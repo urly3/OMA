@@ -1,0 +1,10 @@
+// next.
+user class -> import users to the new match
+
+// then.
+migrate calculations, maybe use better match cost.
+    check other impls to see what they use.
+
+// and then.
+auth -> locking to require password so that it can be undone.
+    still to have just a alias system since no need for privacy.
