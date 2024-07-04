@@ -3,8 +3,9 @@ namespace OMA.Models.Internal;
 class User
 {
     public int Id { get; set; }
+    public long UserId { get; set; }
+    public string Username { get; set; } = default!;
     public string AvatarUrl { get; set; } = default!;
-    public string  Username { get; set; } = default!;
     public string CountryName { get; set; } = default!;
     public string CountryCode { get; set; } = default!;
 

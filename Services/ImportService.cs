@@ -109,7 +109,7 @@ static class ImportService
         return @"?before=" + event_id.ToString() + @"&limit=100";
     }
 
-    internal static Internal::Match GetMatchFromLobby(Imported::Lobby lobby, int bestOf, int warmups)
+    internal static Internal::Match GetMatchFromLobby(Imported::Lobby lobby, int bestOf = 0, int warmups = 0)
     {
         // TODO:
         // get completed, abandoned, warmup, extra games.
@@ -121,7 +121,8 @@ static class ImportService
         // we know the lobby is team vs.
 
         // this is going to be a long function.
-        // maybe this should be async if perfomance is needed for some reason.
+        // cry about it.
+        // maybe this should be async if perfomance is needed for some reason?
 
         Internal::Match match = new();
 
@@ -131,24 +132,24 @@ static class ImportService
         match.StartTime = (DateTime)lobby.match?.start_time!;
         match.StartTime = (DateTime)lobby.match?.end_time!;
 
-        // get each map event played and make a Map from it.
-        // converting each thing into our new types.
-        bool abandoned = false;
-        Internal::Map map = default!;
-        foreach (var gameEvent in lobby.events!)
+        Dictionary<long, Internal::Team> playerTeams = new();
+
+        // maps.
+        foreach (var gameEvent in lobby.events ?? new())
         {
-            map = new()
+            Internal::Map map = new()
             {
-                BeatmapId = (long)gameEvent?.game?.beatmap_id!,
-                BeatmapSetId = (long)gameEvent?.game?.beatmap?.beatmapset_id!,
-                CoverUrl = gameEvent.game?.beatmap?.beatmapset?.covers?.cover ?? "n/a",
-                Mapper = gameEvent.game?.beatmap?.beatmapset?.creator!,
-                Artist = gameEvent.game?.beatmap?.beatmapset?.artist!,
-                Title = gameEvent.game?.beatmap?.beatmapset?.title!,
-                StarRating = (float)gameEvent.game?.beatmap?.difficulty_rating!
+                BeatmapId = gameEvent.game?.beatmap_id ?? 0,
+                BeatmapSetId = gameEvent.game?.beatmap?.beatmapset_id ?? 0,
+                CoverUrl = gameEvent.game?.beatmap?.beatmapset?.covers?.cover ?? "unavailable",
+                Mapper = gameEvent.game?.beatmap?.beatmapset?.creator ?? "unavailable",
+                Artist = gameEvent.game?.beatmap?.beatmapset?.artist ?? "unavailable",
+                Title = gameEvent.game?.beatmap?.beatmapset?.title ?? "unavailable",
+                StarRating = gameEvent.game?.beatmap?.difficulty_rating ?? 0.0f
             };
 
-            foreach (var score in gameEvent.game?.scores!)
+            // scores.
+            foreach (var score in gameEvent.game?.scores ?? new())
             {
                 map.Scores.Add(new()
                 {
@@ -158,20 +159,98 @@ static class ImportService
                     MaxCombo = score.max_combo,
                     PerfectCombo = score.perfect >= 1,
                 });
+
+                if (!playerTeams.ContainsKey(score.user_id))
+                {
+                    playerTeams.Add(score.user_id,
+                        score.match?.team?.ToLower() == "blue" ? Internal::Team.Blue
+                        : score.match?.team?.ToLower() == "red" ? Internal::Team.Red
+                        : Internal::Team.None);
+                }
             }
 
-            abandoned = map.Scores.All(s => s.TotalScore == 0);
-
-            if (!abandoned)
-            {
-                match.CompletedMaps.Add(map);
-            }
-            else
+            if (map.Scores.All(s => s.TotalScore == 0))
             {
                 match.AbandonedMaps.Add(map);
             }
+            else
+            {
+                match.CompletedMaps.Add(map);
+            }
         }
 
+        // users.
+        foreach (var user in lobby.users ?? new())
+        {
+            match.Users.Add(new()
+            {
+                UserId = user.id,
+                Username = user.username!,
+                AvatarUrl = user.avatar_url!,
+                CountryName = user.country?.name!,
+                CountryCode = user.country_code!,
+                Team = playerTeams[user.id],
+            });
+        }
+
+        GetMatchStats(match, bestOf, warmups);
+        GetPlayerStats(match);
         return match;
+    }
+
+    internal static void GetMatchStats(Internal::Match match, int bestOf, int warmups)
+    {
+        int redWins = 0;
+        int blueWins = 0;
+
+        for (int i = 0; i < match.CompletedMaps.Count; ++i)
+        {
+            // TODO:
+            // account for the warmups and best of / extra map(s).
+
+            var map = match.CompletedMaps[i];
+
+            long redTotalScore = 0;
+            int redScoreCount = 0;
+
+            long blueTotalScore = 0;
+            int blueScoreCount = 0;
+
+            foreach (var score in match.CompletedMaps[i].Scores)
+            {
+                Internal::User setBy = match.Users
+                    .Where(u => u.UserId == score.UserId)
+                    .First();
+
+                if (setBy.Team == Internal::Team.Blue)
+                {
+                    blueTotalScore += score.TotalScore;
+                    ++blueScoreCount;
+                }
+                else
+                {
+                    redTotalScore += score.TotalScore;
+                    ++redScoreCount;
+                }
+            }
+
+            map.AverageScore = (redTotalScore + blueTotalScore) / map.Scores.Count;
+            map.BlueAverageScore = blueTotalScore / blueScoreCount;
+            map.RedAverageScore = redTotalScore / redScoreCount;
+
+            if (blueTotalScore > redTotalScore)
+            {
+                ++blueWins;
+            }
+            else
+            {
+                ++redWins;
+            }
+        }
+    }
+
+    internal static void GetPlayerStats(Internal::Match match)
+    {
+
     }
 }
