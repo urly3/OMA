@@ -210,6 +210,18 @@ static class ImportService
 
             var map = match.CompletedMaps[i];
 
+            if (warmups > 0 && i < warmups)
+            {
+                match.CompletedMaps.Remove(map);
+                match.WarmupMaps.Add(map);
+            }
+
+            if (bestOf > 0 && (redWins >= (bestOf + 1) / 2 || blueWins >= (bestOf + 1) / 2))
+            {
+                match.CompletedMaps.Remove(map);
+                match.ExtraMaps.Add(map);
+            }
+
             long redTotalScore = 0;
             int redScoreCount = 0;
 
@@ -247,6 +259,9 @@ static class ImportService
                 ++redWins;
             }
         }
+
+        match.BlueWins = blueWins;
+        match.RedWins = redWins;
     }
 
     internal static void GetPlayerStats(Internal::Match match)
