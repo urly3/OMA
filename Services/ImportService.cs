@@ -1,4 +1,5 @@
 using System.Net;
+using OMA.Models.Internal;
 using Imported = OMA.Models.Imported;
 using Internal = OMA.Models.Internal;
 
@@ -31,15 +32,14 @@ static class ImportService
         // pass in the string and handle both cases with a flag?
         // have the function ready to use urls.
 
-        var impLobby = GetLobbyFromOsu(id);
+        var impLobby = GetLobbyFromId(id);
         var match = GetMatchFromLobby(impLobby, bestOf, warmups);
 
         return match;
     }
 
-    internal static Imported::Lobby GetLobbyFromOsu(long id)
+    internal static Imported::Lobby GetLobbyFromId(long id)
     {
-
         string multi_link = @"https://osu.ppy.sh/community/matches/";
         string base_uri = multi_link + id.ToString();
 
@@ -266,6 +266,43 @@ static class ImportService
 
     internal static void GetPlayerStats(Internal::Match match)
     {
+        foreach (var user in match.Users)
+        {
+            var scoresByUser = match.CompletedMaps.SelectMany(cm => cm.Scores.Where(s => s.UserId == user.UserId));
+            if (scoresByUser == null)
+            {
+                user.Status = PlayerStatus.NotPlayed;
+                return;
+            }
 
+            foreach (var score in scoresByUser)
+            {
+                // highs.
+                if (user.HighestScore == 0 || score.TotalScore > user.HighestScore)
+                {
+                    user.HighestScore = score.TotalScore;
+                }
+                if (user.HighestAccuracy == 0 || score.Accuracy > user.HighestAccuracy)
+                {
+                    user.HighestAccuracy = score.Accuracy;
+                }
+
+                // lows.
+                if (user.LowestScore == 0 || score.TotalScore < user.LowestScore)
+                {
+                    user.LowestScore = score.TotalScore;
+                }
+                if (user.LowestAccuracy == 0 || score.Accuracy < user.LowestAccuracy)
+                {
+                    user.LowestAccuracy = score.Accuracy;
+                }
+
+                user.AverageScore += score.TotalScore;
+                user.AverageAccuracy += score.Accuracy;
+
+                // TODO:
+                // match cost
+            }
+        }
     }
 }

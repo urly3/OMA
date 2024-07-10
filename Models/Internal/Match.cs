@@ -7,9 +7,14 @@ enum Team
     Red,
 }
 
+enum PlayerStatus
+{
+    NotPlayed,
+    Played,
+}
+
 class Match
 {
-    public int Id { get; set; }
     public long MultiId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }

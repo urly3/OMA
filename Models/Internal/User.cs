@@ -2,7 +2,6 @@ namespace OMA.Models.Internal;
 
 class User
 {
-    public int Id { get; set; }
     public long UserId { get; set; }
     public string Username { get; set; } = default!;
     public string AvatarUrl { get; set; } = default!;
@@ -10,6 +9,7 @@ class User
     public string CountryCode { get; set; } = default!;
 
     public Team Team { get; set; } = Team.None;
+    public PlayerStatus Status { get; set; } = PlayerStatus.NotPlayed;
 
     public float MatchCostTeam { get; set; }
     public float MatchCostTotal { get; set; }
