@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using OMA.Services;
 
 namespace OMA.Controllers;
 
@@ -8,7 +9,8 @@ public class ApiController : Controller
     // GET: ApiController
     public ActionResult Index()
     {
-        return Ok();
+        var match = ImportService.GetMatch(111534249, 13);
+        return Ok(match);
     }
 
 }

@@ -7,12 +7,6 @@ enum Team
     Red,
 }
 
-enum PlayerStatus
-{
-    NotPlayed,
-    Played,
-}
-
 class Match
 {
     public long MultiId { get; set; }
@@ -23,9 +17,9 @@ class Match
     public int RedWins { get; set; } = 0;
     public int BlueWins { get; set; } = 0;
     public Team WinningTeam { get; set; } = Team.None;
-    public List<User> Users { get; set; } = new();
-    public List<Map> CompletedMaps { get; set; } = new();
-    public List<Map> ExtraMaps { get; set; } = new();
-    public List<Map> WarmupMaps { get; set; } = new();
-    public List<Map> AbandonedMaps { get; set; } = new();
+    public List<User> Users { get; set; } = new(0);
+    public List<Map> CompletedMaps { get; set; } = new(0);
+    public List<Map> ExtraMaps { get; set; } = new(0);
+    public List<Map> WarmupMaps { get; set; } = new(0);
+    public List<Map> AbandonedMaps { get; set; } = new(0);
 }

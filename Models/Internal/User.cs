@@ -9,7 +9,7 @@ class User
     public string CountryCode { get; set; } = default!;
 
     public Team Team { get; set; } = Team.None;
-    public PlayerStatus Status { get; set; } = PlayerStatus.NotPlayed;
+    public int MapsPlayed { get; set; } = 0;
 
     public float MatchCostTeam { get; set; }
     public float MatchCostTotal { get; set; }

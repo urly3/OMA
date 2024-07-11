@@ -1,13 +1,24 @@
 using System.Net;
-using OMA.Models.Internal;
 using Imported = OMA.Models.Imported;
 using Internal = OMA.Models.Internal;
 
 namespace OMA.Services;
 
-static class ImportService
+public static class ImportService
 {
-    internal static long LobbyIdFromUrl(string url)
+    internal static Internal::Match GetMatch(long id, int bestOf = 0, int warmups = 0)
+    {
+        // FIXME:
+        // pass in the string and handle both cases with a flag?
+        // have the function ready to use urls.
+
+        var lobby = GetLobbyFromId(id);
+        var match = GetMatchFromLobby(lobby, bestOf, warmups);
+
+        return match;
+    }
+
+    private static long LobbyIdFromUrl(string url)
     {
         if (!Uri.TryCreate(url, new UriCreationOptions(), out var uri))
         {
@@ -17,8 +28,7 @@ static class ImportService
         string strId = uri.Segments.Last();
 
 
-        if (!long.TryParse(strId, out var id)
-)
+        if (!long.TryParse(strId, out var id))
         {
             throw new Exception("invalid url: didn't end in an id");
         }
@@ -26,19 +36,7 @@ static class ImportService
         return id;
     }
 
-    internal static Internal::Match GetMatch(long id, int bestOf = 0, int warmups = 0)
-    {
-        // FIXME:
-        // pass in the string and handle both cases with a flag?
-        // have the function ready to use urls.
-
-        var impLobby = GetLobbyFromId(id);
-        var match = GetMatchFromLobby(impLobby, bestOf, warmups);
-
-        return match;
-    }
-
-    internal static Imported::Lobby GetLobbyFromId(long id)
+    private static Imported::Lobby GetLobbyFromId(long id)
     {
         string multi_link = @"https://osu.ppy.sh/community/matches/";
         string base_uri = multi_link + id.ToString();
@@ -104,17 +102,15 @@ static class ImportService
         }
     }
 
-    internal static string GenerateAdditionalQueryString(long event_id)
+    private static string GenerateAdditionalQueryString(long event_id)
     {
         return @"?before=" + event_id.ToString() + @"&limit=100";
     }
 
-    internal static Internal::Match GetMatchFromLobby(Imported::Lobby lobby, int bestOf = 0, int warmups = 0)
+    private static Internal::Match GetMatchFromLobby(Imported::Lobby lobby, int bestOf = 0, int warmups = 0)
     {
         // TODO:
-        // get completed, abandoned, warmup, extra games.
         // calculate all the stats.
-        // return the match in the new format.
 
         // we know the lobby has events.
         // we know the lobby has users.
@@ -135,7 +131,7 @@ static class ImportService
         Dictionary<long, Internal::Team> playerTeams = new();
 
         // maps.
-        foreach (var gameEvent in lobby.events ?? new())
+        foreach (var gameEvent in lobby.events?.Where(e => e.detail?.type == "other").ToList() ?? new(0))
         {
             Internal::Map map = new()
             {
@@ -160,6 +156,8 @@ static class ImportService
                     PerfectCombo = score.perfect >= 1,
                 });
 
+                // save teams of each player.
+                // thus, we only add users to the match that have set a score.
                 if (!playerTeams.ContainsKey(score.user_id))
                 {
                     playerTeams.Add(score.user_id,
@@ -182,6 +180,11 @@ static class ImportService
         // users.
         foreach (var user in lobby.users ?? new())
         {
+            if (!playerTeams.ContainsKey(user.id))
+            {
+                continue;
+            }
+
             match.Users.Add(new()
             {
                 UserId = user.id,
@@ -193,33 +196,31 @@ static class ImportService
             });
         }
 
-        GetMatchStats(match, bestOf, warmups);
+        GetMatchStats(match);
         GetPlayerStats(match);
         return match;
     }
 
-    internal static void GetMatchStats(Internal::Match match, int bestOf, int warmups)
+    private static void GetMatchStats(Internal::Match match)
     {
         int redWins = 0;
         int blueWins = 0;
+        bool skipMap = false;
 
         for (int i = 0; i < match.CompletedMaps.Count; ++i)
         {
-            // TODO:
-            // account for the warmups and best of / extra map(s).
-
             var map = match.CompletedMaps[i];
 
-            if (warmups > 0 && i < warmups)
+            if (match.WarmupCount > 0 && i < match.WarmupCount)
             {
-                match.CompletedMaps.Remove(map);
                 match.WarmupMaps.Add(map);
+                skipMap = true;
             }
 
-            if (bestOf > 0 && (redWins >= (bestOf + 1) / 2 || blueWins >= (bestOf + 1) / 2))
+            if (match.BestOf > 0 && (redWins >= (match.BestOf + 1) / 2 || blueWins >= (match.BestOf + 1) / 2))
             {
-                match.CompletedMaps.Remove(map);
                 match.ExtraMaps.Add(map);
+                skipMap = true;
             }
 
             long redTotalScore = 0;
@@ -250,6 +251,11 @@ static class ImportService
             map.BlueAverageScore = blueTotalScore / blueScoreCount;
             map.RedAverageScore = redTotalScore / redScoreCount;
 
+            if (skipMap)
+            {
+                continue;
+            }
+
             if (blueTotalScore > redTotalScore)
             {
                 ++blueWins;
@@ -262,18 +268,24 @@ static class ImportService
 
         match.BlueWins = blueWins;
         match.RedWins = redWins;
+
+        // remove non-tourney maps.
+        foreach (var map in match.AbandonedMaps)
+        {
+            match.CompletedMaps.Remove(map);
+        }
+        foreach (var map in match.ExtraMaps)
+        {
+            match.CompletedMaps.Remove(map);
+        }
     }
 
-    internal static void GetPlayerStats(Internal::Match match)
+    private static void GetPlayerStats(Internal::Match match)
     {
         foreach (var user in match.Users)
         {
             var scoresByUser = match.CompletedMaps.SelectMany(cm => cm.Scores.Where(s => s.UserId == user.UserId));
-            if (scoresByUser == null)
-            {
-                user.Status = PlayerStatus.NotPlayed;
-                return;
-            }
+            user.MapsPlayed = scoresByUser.Count();
 
             foreach (var score in scoresByUser)
             {
@@ -303,6 +315,9 @@ static class ImportService
                 // TODO:
                 // match cost
             }
+
+            user.AverageScore /= user.MapsPlayed;
+            user.AverageAccuracy /= user.MapsPlayed;
         }
     }
 }
