@@ -12,7 +12,7 @@ public record Score
     public List<string>? mods { get; set; }
     public bool passed { get; set; }
     public int perfect { get; set; }
-    public object? pp { get; set; }
+    public float? pp { get; set; }
     public string? rank { get; set; }
     public bool replay { get; set; }
     public int score { get; set; }

@@ -1,7 +1,10 @@
+using OMA.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<OMADataService>();
 
 var app = builder.Build();
 

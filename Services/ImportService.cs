@@ -8,7 +8,7 @@ public static class ImportService
 {
     internal static Internal::Match GetMatch(long id, int bestOf = 0, int warmups = 0)
     {
-        // FIXME:
+        // TODO:
         // pass in the string and handle both cases with a flag?
         // have the function ready to use urls.
 
@@ -90,12 +90,12 @@ public static class ImportService
 
             foreach (var gameEvent in lobby.events.Where(e => e.game != null))
             {
+                // TODO:
+                // handle other team types.
                 if (gameEvent?.game?.team_type != "team-vs")
                 {
                     throw new Exception("not team vs");
                 }
-
-                lobby.CompletedGames.Add(gameEvent ?? Enumerable.Empty<Imported::Event>().GetEnumerator().Current);
             }
 
             return lobby;
@@ -109,9 +109,6 @@ public static class ImportService
 
     private static Internal::Match GetMatchFromLobby(Imported::Lobby lobby, int bestOf = 0, int warmups = 0)
     {
-        // TODO:
-        // calculate all the stats.
-
         // we know the lobby has events.
         // we know the lobby has users.
         // we know the lobby is team vs.
@@ -154,6 +151,7 @@ public static class ImportService
                     Accuracy = score.accuracy,
                     MaxCombo = score.max_combo,
                     PerfectCombo = score.perfect >= 1,
+                    PP = score.pp ?? 0.0f,
                 });
 
                 // save teams of each player.

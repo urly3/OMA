@@ -7,5 +7,5 @@ class Score
     public float Accuracy { get; set; }
     public long MaxCombo { get; set; }
     public bool PerfectCombo { get; set; }
-    public int PP { get; set; }
+    public float PP { get; set; }
 }
