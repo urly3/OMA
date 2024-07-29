@@ -12,18 +12,21 @@ public class OMADataService
         _context = new OMAContext();
     }
 
-    public Alias? GetAlias(string name)
+    internal Alias? GetAlias(string name)
     {
-        var hashBytes = XxHash128.Hash(System.Text.Encoding.UTF8.GetBytes(name));
-        var hash = System.Text.Encoding.UTF8.GetString(hashBytes);
+        var hash = HashString(name);
 
         return _context.Aliases.Where(a => a.Hash == hash).FirstOrDefault();
     }
 
-    public bool CreateAlias(string name)
+    internal Alias? GetAliasById(int id)
     {
-        var hashBytes = XxHash128.Hash(System.Text.Encoding.UTF8.GetBytes(name));
-        var hash = System.Text.Encoding.UTF8.GetString(hashBytes);
+        return _context.Aliases.FirstOrDefault(a => a.Id == id);
+    }
+
+    internal bool CreateAlias(string name)
+    {
+        var hash = HashString(name);
 
         _context.Aliases.Add(new()
         {
@@ -33,7 +36,7 @@ public class OMADataService
         return _context.SaveChanges() == 1;
     }
 
-    public bool AddLobbyToAlias(Alias alias, Lobby lobby)
+    internal bool AddLobbyToAlias(Alias alias, Lobby lobby)
     {
         alias.Lobbies.Add(lobby);
         _context.Aliases.Update(alias);
@@ -41,7 +44,7 @@ public class OMADataService
         return _context.SaveChanges() == 1;
     }
 
-    public bool RemoveLobbyFromAlias(Alias alias, Lobby lobby)
+    internal bool RemoveLobbyFromAlias(Alias alias, Lobby lobby)
     {
         alias.Lobbies.Remove(lobby);
         _context.Aliases.Update(alias);
@@ -49,10 +52,9 @@ public class OMADataService
         return _context.SaveChanges() == 1;
     }
 
-    public bool SetAliasPassword(Alias alias, string password)
+    internal bool SetAliasPassword(Alias alias, string password)
     {
-        var hashBytes = XxHash128.Hash(System.Text.Encoding.UTF8.GetBytes(password));
-        var hash = System.Text.Encoding.UTF8.GetString(hashBytes);
+        var hash = HashString(password);
 
         alias.Password = hash;
         _context.Aliases.Update(alias);
@@ -60,11 +62,17 @@ public class OMADataService
         return _context.SaveChanges() == 1;
     }
 
-    public bool RemoveAliasPassword(Alias alias)
+    internal bool RemoveAliasPassword(Alias alias)
     {
         alias.Password = null;
         _context.Aliases.Update(alias);
 
         return _context.SaveChanges() == 1;
+    }
+
+    internal string HashString(string value)
+    {
+        var hashBytes = XxHash128.Hash(System.Text.Encoding.UTF8.GetBytes(value));
+        return System.Text.Encoding.UTF8.GetString(hashBytes);
     }
 }

@@ -1,5 +1,6 @@
 using OMA.Data;
 using OMA.Models;
+using OMA.Models.Dto;
 
 namespace OMA.Services;
 
@@ -24,9 +25,34 @@ class OMAService
         return _dataService.GetAlias(name)?.Password != null;
     }
 
+    public bool ValidateAliasPassword(string name, string password)
+    {
+        var alias = _dataService.GetAlias(name);
+        if (alias == null)
+        {
+            return false;
+        }
+
+        var passwordHash = _dataService.HashString(password);
+
+        return alias.Password == passwordHash;
+    }
+
     public Alias? GetAlias(string name)
     {
         return _dataService.GetAlias(name);
+    }
+
+    public AliasDto? GetAliasAsDto(string name)
+    {
+        AliasDto dto = new(_dataService.GetAlias(name));
+
+        return dto.Id == -1 ? null : dto;
+    }
+
+    public Alias? GetAliasFromDto(AliasDto dto)
+    {
+        return _dataService.GetAliasById(dto.Id);
     }
 
     public Alias? CreateAlias(string name)
@@ -71,5 +97,22 @@ class OMAService
         }
 
         return _dataService.SetAliasPassword(alias, password);
+    }
+
+    public bool UnsetAliasPassword(string name)
+    {
+        Alias? alias = GetAlias(name);
+
+        if (alias == null)
+        {
+            return false;
+        }
+
+        if (alias.Password == null)
+        {
+            return false;
+        }
+
+        return _dataService.RemoveAliasPassword(alias);
     }
 }

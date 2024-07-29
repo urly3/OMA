@@ -1,3 +1,4 @@
+using OMA.Models.Dto;
 
 namespace OMA.Models;
 
