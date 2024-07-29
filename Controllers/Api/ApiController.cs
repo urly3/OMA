@@ -22,7 +22,7 @@ public class ApiController : Controller
         return Ok(match);
     }
 
-    [HttpGet("get")]
+    [HttpGet("get_alias")]
     public ActionResult GetAlias()
     {
         string? name = Request.Query["name"];
@@ -32,11 +32,12 @@ public class ApiController : Controller
         }
 
         var alias = _omaService.GetAlias(name);
-        
-        return alias != null ? Ok(alias) : Ok("alias does not exist."); 
+
+        return alias != null ? Ok(alias) : Ok("alias does not exist.");
     }
 
-    [HttpGet("create")]
+    // change to post when things are more concrete.
+    [HttpGet("create_alias")]
     public ActionResult CreateAlias()
     {
         string? name = Request.Query["name"];
@@ -45,15 +46,55 @@ public class ApiController : Controller
             return BadRequest("parameter 'name' not provided.");
         }
 
-        var alias = _omaService.CreateAlias(name);
-
-        if (alias == null)
+        if (_omaService.AliasExists(name))
         {
-            return Ok("alias exists or could not be created.");
+            return Ok("alias already exists.");
         }
-        
-        return Ok(alias); 
+
+        if (_omaService.CreateAlias(name) == null)
+        {
+            return Ok("alias could not be created.");
+        }
+        else
+        {
+            return Ok("alias created.");
+        }
     }
+
+    // change to post when things are more concrete.
+    [HttpGet("set_password")]
+    public ActionResult SetPassword()
+    {
+        string? name = Request.Query["name"];
+        if (name == null)
+        {
+            return BadRequest("parameter 'name' not provided.");
+        }
+
+        string? password = Request.Query["password"];
+        if (password == null)
+        {
+            return BadRequest("parameter 'password' not provided.");
+        }
+
+        if (!_omaService.AliasExists(name))
+        {
+            return Ok("alias does not exist.");
+        }
+        if (_omaService.AliasHasPassword(name))
+        {
+            return Ok("alias password is already set.");
+        }
+
+        if (!_omaService.SetAliasPassword(name, password))
+        {
+            return Ok("password could not be set.");
+        }
+
+        return Ok("password set.");
+    }
+
+    //////////////////
 
     [HttpGet("test/createkanealias")]
     public ActionResult CreateKaneAlias()

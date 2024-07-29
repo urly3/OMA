@@ -12,6 +12,18 @@ class OMAService
         _dataService = dataService;
     }
 
+    public bool AliasExists(string name)
+    {
+        return _dataService.GetAlias(name) != null;
+    }
+
+    public bool AliasHasPassword(string name)
+    {
+        // this should only be called after AliasExists, so we know the
+        // alias is not null.
+        return _dataService.GetAlias(name)?.Password != null;
+    }
+
     public Alias? GetAlias(string name)
     {
         return _dataService.GetAlias(name);
@@ -42,5 +54,22 @@ class OMAService
         }
 
         return alias;
+    }
+
+    public bool SetAliasPassword(string name, string password)
+    {
+        Alias? alias = GetAlias(name);
+
+        if (alias == null)
+        {
+            return false;
+        }
+
+        if (alias.Password != null)
+        {
+            return false;
+        }
+
+        return _dataService.SetAliasPassword(alias, password);
     }
 }
