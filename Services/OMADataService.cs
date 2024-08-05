@@ -33,7 +33,7 @@ public class OMADataService
             Hash = hash,
         });
 
-        return _context.SaveChanges() == 1;
+        return _context.SaveChanges() != 0;
     }
 
     internal bool AddLobbyToAlias(Alias alias, Lobby lobby)
@@ -41,7 +41,7 @@ public class OMADataService
         alias.Lobbies.Add(lobby);
         _context.Aliases.Update(alias);
 
-        return _context.SaveChanges() == 1;
+        return _context.SaveChanges() != 0;
     }
 
     internal bool RemoveLobbyFromAlias(Alias alias, Lobby lobby)
@@ -49,7 +49,7 @@ public class OMADataService
         alias.Lobbies.Remove(lobby);
         _context.Aliases.Update(alias);
 
-        return _context.SaveChanges() == 1;
+        return _context.SaveChanges() != 0;
     }
 
     internal bool SetAliasPassword(Alias alias, string password)
@@ -59,7 +59,7 @@ public class OMADataService
         alias.Password = hash;
         _context.Aliases.Update(alias);
 
-        return _context.SaveChanges() == 1;
+        return _context.SaveChanges() != 0;
     }
 
     internal bool RemoveAliasPassword(Alias alias)
@@ -67,7 +67,7 @@ public class OMADataService
         alias.Password = null;
         _context.Aliases.Update(alias);
 
-        return _context.SaveChanges() == 1;
+        return _context.SaveChanges() != 0;
     }
 
     internal string HashString(string value)

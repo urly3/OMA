@@ -115,4 +115,32 @@ class OMAService
 
         return _dataService.RemoveAliasPassword(alias);
     }
+
+    public bool AddLobbyToAlias(string name, long lobbyId, int bestOf, int warmups)
+    {
+        Alias? alias = GetAlias(name);
+        if (alias == null)
+        {
+            return false;
+        }
+
+        if (alias.Password != null)
+        {
+            return false;
+        }
+
+        if (!OMAImportService.DoesLobbyExist(lobbyId))
+        {
+            return false;
+        }
+
+        Lobby lobby = new()
+        {
+            LobbyId = lobbyId,
+            BestOf = bestOf,
+            Warmups = warmups,
+        };
+
+        return _dataService.AddLobbyToAlias(alias, lobby);
+    }
 }

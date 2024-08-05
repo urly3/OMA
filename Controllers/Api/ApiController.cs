@@ -19,7 +19,7 @@ public class ApiController : Controller
 
     public ActionResult Index()
     {
-        var match = ImportService.GetMatch(111534249, 13);
+        var match = OMAImportService.GetMatch(111534249, 13);
         return Ok(match);
     }
 
@@ -130,5 +130,56 @@ public class ApiController : Controller
         }
 
         return Ok("password unset.");
+    }
+
+    // change to post(?) when more concrete.
+    [HttpGet("add_lobby")]
+    ActionResult AddLobby()
+    {
+        string? name = Request.Query["name"];
+        if (string.IsNullOrEmpty(name))
+        {
+            return BadRequest("parameter 'name' not provided.");
+        }
+
+        string? lobby = Request.Query["lobby"];
+        if (string.IsNullOrEmpty(lobby))
+        {
+            return BadRequest("parameter 'lobby' not provided.");
+        }
+
+        int bestOf = 0;
+        int warmups = 0;
+
+        string? bestOfStr = Request.Query["bestof"];
+        if (!string.IsNullOrEmpty(bestOfStr))
+        {
+            int.TryParse(bestOfStr, out bestOf);
+        }
+
+        string? warmupsStr = Request.Query["warmups"];
+        if (!string.IsNullOrEmpty(warmupsStr))
+        {
+            int.TryParse(warmupsStr, out warmups);
+        }
+
+        long lobbyId;
+
+        if (!long.TryParse(lobby, out lobbyId))
+        {
+            return Ok("lobby value not a number.");
+        }
+
+        if (!_omaService.AliasExists(name))
+        {
+            return Ok("alias does not exist");
+        }
+
+        if (!_omaService.AddLobbyToAlias(name, lobbyId, bestOf, warmups))
+        {
+            return Ok("could not add lobby to alias.");
+        }
+
+        return Ok("lobby added to alias.");
     }
 }

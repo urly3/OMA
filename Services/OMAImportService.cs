@@ -4,8 +4,28 @@ using Internal = OMA.Models.Internal;
 
 namespace OMA.Services;
 
-public static class ImportService
+public static class OMAImportService
 {
+    internal static bool DoesLobbyExist(long lobbyId)
+    {
+        string multi_link = @"https://osu.ppy.sh/community/matches/";
+        string base_uri = multi_link + lobbyId.ToString();
+
+        using (var client = new HttpClient())
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, base_uri);
+            request.Headers.Add("Accept", @"application/json, text/javascript, */*; q=0.01");
+            var response = client.Send(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+
     internal static Internal::Match GetMatch(long id, int bestOf = 0, int warmups = 0)
     {
         // TODO:

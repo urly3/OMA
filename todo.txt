@@ -1,0 +1,2 @@
+error codes for more specific returns.
+possibly factor out some logic (debating if that would be better).
