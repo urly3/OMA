@@ -1,2 +1,3 @@
-error codes for more specific returns.
+state enums for more specific returns instead of bools.
 possibly factor out some logic (debating if that would be better).
+don't use ok for everything.

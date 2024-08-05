@@ -143,4 +143,22 @@ class OMAService
 
         return _dataService.AddLobbyToAlias(alias, lobby);
     }
+
+    public bool RemoveLobbyFromAlias(string name, long lobbyId)
+    {
+        Alias? alias = GetAlias(name);
+        if (alias == null)
+        {
+            return false;
+        }
+
+        if (alias.Password != null)
+        {
+            return false;
+        }
+
+        var lobby = alias.Lobbies.FirstOrDefault(x => x.LobbyId == lobbyId);
+
+        return lobby != null ? _dataService.RemoveLobbyFromAlias(alias, lobby) : false;
+    }
 }

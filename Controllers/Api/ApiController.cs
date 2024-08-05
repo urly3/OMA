@@ -182,4 +182,40 @@ public class ApiController : Controller
 
         return Ok("lobby added to alias.");
     }
+
+    // change to post(?) when more concrete.
+    [HttpGet("remove_lobby")]
+    ActionResult RemoveLobby()
+    {
+        string? name = Request.Query["name"];
+        if (string.IsNullOrEmpty(name))
+        {
+            return BadRequest("parameter 'name' not provided.");
+        }
+
+        string? lobby = Request.Query["lobby"];
+        if (string.IsNullOrEmpty(lobby))
+        {
+            return BadRequest("parameter 'lobby' not provided.");
+        }
+
+        long lobbyId;
+
+        if (!long.TryParse(lobby, out lobbyId))
+        {
+            return Ok("lobby value not a number.");
+        }
+
+        if (!_omaService.AliasExists(name))
+        {
+            return Ok("alias does not exist");
+        }
+
+        if (!_omaService.RemoveLobbyFromAlias(name, lobbyId))
+        {
+            return Ok("could not remove lobby from alias.");
+        }
+
+        return Ok("lobby removed from alias.");
+    }
 }
