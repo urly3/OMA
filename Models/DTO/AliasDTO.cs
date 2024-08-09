@@ -1,5 +1,3 @@
-using OMA.Models;
-
 namespace OMA.Models.Dto;
 
 public class AliasDto

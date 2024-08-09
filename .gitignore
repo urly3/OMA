@@ -4,3 +4,4 @@ obj/
 .vscode/
 wwwroot/
 omadb.db*
+Migrations/

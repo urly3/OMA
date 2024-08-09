@@ -58,7 +58,7 @@ namespace OMA.Migrations
                     b.Property<int>("BestOf")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("LobbyId")
+                    b.Property<long>("LobbyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Warmups")

@@ -19,8 +19,13 @@ public class ApiController : Controller
 
     public ActionResult Index()
     {
-        var match = OMAImportService.GetMatch(111534249, 13);
-        return Ok(match);
+        AliasDto? dto = _omaService.GetAliasAsDto("kane");
+        if (dto != null)
+        {
+            return Ok(dto);
+        }
+
+        return Ok("no dto");
     }
 
     [HttpGet("get_alias")]
@@ -134,7 +139,7 @@ public class ApiController : Controller
 
     // change to post(?) when more concrete.
     [HttpGet("add_lobby")]
-    ActionResult AddLobby()
+    public ActionResult AddLobby()
     {
         string? name = Request.Query["name"];
         if (string.IsNullOrEmpty(name))
@@ -185,7 +190,7 @@ public class ApiController : Controller
 
     // change to post(?) when more concrete.
     [HttpGet("remove_lobby")]
-    ActionResult RemoveLobby()
+    public ActionResult RemoveLobby()
     {
         string? name = Request.Query["name"];
         if (string.IsNullOrEmpty(name))

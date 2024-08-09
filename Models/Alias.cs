@@ -1,5 +1,3 @@
-using OMA.Models.Dto;
-
 namespace OMA.Models;
 
 public record Alias
