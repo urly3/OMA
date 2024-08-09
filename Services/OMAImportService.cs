@@ -29,13 +29,13 @@ public static class OMAImportService
     internal static Internal::Match GetMatch(long id, int bestOf = 0, int warmups = 0)
     {
         // TODO:
+        // use nullables instead of exceptions, or unions / options.
         // pass in the string and handle both cases with a flag?
         // have the function ready to use urls.
-
         var lobby = GetLobbyFromId(id);
         var match = GetMatchFromLobby(lobby, bestOf, warmups);
-
         return match;
+
     }
 
     private static long LobbyIdFromUrl(string url)
@@ -127,6 +127,7 @@ public static class OMAImportService
         return @"?before=" + event_id.ToString() + @"&limit=100";
     }
 
+    // converting the imported lobby type into the match type that we can perform operations on.
     private static Internal::Match GetMatchFromLobby(Imported::Lobby lobby, int bestOf = 0, int warmups = 0)
     {
         // we know the lobby has events.

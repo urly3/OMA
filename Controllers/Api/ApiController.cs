@@ -172,7 +172,7 @@ public class ApiController : Controller
 
         if (!long.TryParse(lobby, out lobbyId))
         {
-            return Ok("lobby value not a number.");
+            return Ok("lobby value not a valid number.");
         }
 
         if (!_omaService.AliasExists(name))
@@ -208,7 +208,7 @@ public class ApiController : Controller
 
         if (!long.TryParse(lobby, out lobbyId))
         {
-            return Ok("lobby value not a number.");
+            return Ok("lobby value not a valid number.");
         }
 
         if (!_omaService.AliasExists(name))
@@ -222,5 +222,47 @@ public class ApiController : Controller
         }
 
         return Ok("lobby removed from alias.");
+    }
+
+    [HttpGet("get_match")]
+    public ActionResult GetMatch()
+    {
+        string? lobby = Request.Query["lobby"];
+
+        if (string.IsNullOrEmpty(lobby))
+        {
+            return Ok("lobby id not provided.");
+        }
+
+        int bestOf = 0;
+        int warmups = 0;
+
+        string? bestOfStr = Request.Query["bestof"];
+        if (!string.IsNullOrEmpty(bestOfStr))
+        {
+            int.TryParse(bestOfStr, out bestOf);
+        }
+
+        string? warmupsStr = Request.Query["warmups"];
+        if (!string.IsNullOrEmpty(warmupsStr))
+        {
+            int.TryParse(warmupsStr, out warmups);
+        }
+
+        long lobbyId;
+
+        if (!long.TryParse(lobby, out lobbyId))
+        {
+            return Ok("lobby value not a valid number.");
+        }
+
+        var match = _omaService.GetMatch(lobbyId, bestOf, warmups);
+
+        if (match == null)
+        {
+            return Ok("could not get the match.");
+        }
+
+        return Ok(match);
     }
 }

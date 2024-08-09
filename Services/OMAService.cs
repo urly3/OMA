@@ -1,6 +1,7 @@
 using OMA.Data;
 using OMA.Models;
 using OMA.Models.Dto;
+using OMA.Models.Internal;
 
 namespace OMA.Services;
 
@@ -160,5 +161,18 @@ class OMAService
         var lobby = alias.Lobbies.FirstOrDefault(x => x.LobbyId == lobbyId);
 
         return lobby != null ? _dataService.RemoveLobbyFromAlias(alias, lobby) : false;
+    }
+
+    public Match? GetMatch(long lobby, int bestOf, int warmups)
+    {
+        try
+        {
+            var match = OMAImportService.GetMatch(lobby, bestOf, warmups);
+            return match;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
