@@ -3,7 +3,7 @@ namespace OMA.Models.Dto;
 public class AliasDto
 {
     public int Id { get; set; } = -1;
-    public List<Lobby> Lobbies { get; set; } = [];
+    public List<LobbyDTO> Lobbies { get; set; } = [];
     public bool Locked { get; set; } = false;
 
     internal AliasDto(Alias? alias)
@@ -14,7 +14,11 @@ public class AliasDto
         }
 
         Id = alias.Id;
-        Lobbies = alias.Lobbies;
         Locked = alias.Password != null;
+
+        foreach (var lobby in alias.Lobbies)
+        {
+            Lobbies.Add(new(lobby));
+        }
     }
 }

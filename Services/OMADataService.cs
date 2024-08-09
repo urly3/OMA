@@ -16,7 +16,15 @@ public class OMADataService
     {
         var hash = HashString(name);
 
-        return _context.Aliases.Where(a => a.Hash == hash).FirstOrDefault();
+        var alias = _context.Aliases.FirstOrDefault(a => a.Hash == hash);
+        if (alias == null)
+        {
+            return null;
+        }
+
+        alias.Lobbies = _context.Lobbies.Where(l => l.Aliases.Contains(alias)).ToList();
+
+        return alias;
     }
 
     internal Alias? GetAliasById(int id)
