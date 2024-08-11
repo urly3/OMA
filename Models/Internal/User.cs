@@ -19,6 +19,6 @@ class User
     public long LowestScore { get; set; }
 
     public float AverageAccuracy { get; set; }
-    public float HighestAccuracy{ get; set; }
+    public float HighestAccuracy { get; set; }
     public float LowestAccuracy { get; set; }
 }

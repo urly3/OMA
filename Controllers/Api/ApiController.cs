@@ -265,4 +265,17 @@ public class ApiController : Controller
 
         return Ok(match);
     }
+
+    [HttpGet("get_matches")]
+    public ActionResult GetMatches()
+    {
+        string? alias = Request.Query["alias"];
+
+        if (string.IsNullOrEmpty(alias))
+        {
+            return Ok("alias not provided.");
+        }
+
+        return Ok(_omaService.GetMatches(alias));
+    }
 }

@@ -175,4 +175,29 @@ class OMAService
             return null;
         }
     }
+
+    public List<Match> GetMatches(string name)
+    {
+        var alias = GetAliasAsDto(name);
+        if (alias == null)
+        {
+            return [];
+        }
+
+        try
+        {
+            List<Match> matches = [];
+
+            foreach (var lobby in alias.Lobbies)
+            {
+                matches.Add(OMAImportService.GetMatch(lobby.LobbyId, lobby.BestOf, lobby.Warmups));
+            }
+
+            return matches;
+        }
+        catch
+        {
+            return [];
+        }
+    }
 }
