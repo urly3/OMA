@@ -17,7 +17,7 @@ public class OMADataService
     {
         var hash = HashString(name);
 
-        var alias = _context.Aliases.Include("Lobbies").FirstOrDefault(a => a.Hash == hash);
+        var alias = _context.Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Hash == hash);
         if (alias == null)
         {
             return null;
@@ -28,7 +28,7 @@ public class OMADataService
 
     internal Alias? GetAliasById(int id)
     {
-        return _context.Aliases.Include("Lobbies").FirstOrDefault(a => a.Id == id);
+        return _context.Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Id == id);
     }
 
     internal bool CreateAlias(string name)
