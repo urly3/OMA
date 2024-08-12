@@ -276,6 +276,12 @@ public class ApiController : Controller
             return Ok("alias not provided.");
         }
 
+        var matches = _omaService.GetMatches(alias);
+        if (matches == null)
+        {
+            return Ok("alias does not exist.");
+        }
+
         return Ok(_omaService.GetMatches(alias));
     }
 }

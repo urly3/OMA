@@ -176,12 +176,12 @@ class OMAService
         }
     }
 
-    public List<Match> GetMatches(string name)
+    public List<Match>? GetMatches(string name)
     {
         var alias = GetAliasAsDto(name);
         if (alias == null)
         {
-            return [];
+            return null;
         }
 
         try
