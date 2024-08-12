@@ -31,13 +31,13 @@ public class ApiController : Controller
     [HttpGet("get_alias")]
     public ActionResult GetAlias()
     {
-        string? name = Request.Query["name"];
-        if (string.IsNullOrEmpty(name))
+        string? alias = Request.Query["alias"];
+        if (string.IsNullOrEmpty(alias))
         {
-            return BadRequest("parameter 'name' not provided.");
+            return BadRequest("parameter 'alias' not provided.");
         }
 
-        var dto = _omaService.GetAliasAsDto(name);
+        var dto = _omaService.GetAliasAsDto(alias);
 
         return dto != null ? Ok(dto) : Ok("alias does not exist.");
     }
@@ -46,18 +46,18 @@ public class ApiController : Controller
     [HttpGet("create_alias")]
     public ActionResult CreateAlias()
     {
-        string? name = Request.Query["name"];
-        if (string.IsNullOrEmpty(name))
+        string? alias = Request.Query["alias"];
+        if (string.IsNullOrEmpty(alias))
         {
-            return BadRequest("parameter 'name' not provided.");
+            return BadRequest("parameter 'alias' not provided.");
         }
 
-        if (_omaService.AliasExists(name))
+        if (_omaService.AliasExists(alias))
         {
             return Ok("alias already exists.");
         }
 
-        if (_omaService.CreateAlias(name) == null)
+        if (_omaService.CreateAlias(alias) == null)
         {
             return Ok("alias could not be created.");
         }
@@ -69,10 +69,10 @@ public class ApiController : Controller
     [HttpGet("set_password")]
     public ActionResult SetPassword()
     {
-        string? name = Request.Query["name"];
-        if (string.IsNullOrEmpty(name))
+        string? alias = Request.Query["alias"];
+        if (string.IsNullOrEmpty(alias))
         {
-            return BadRequest("parameter 'name' not provided.");
+            return BadRequest("parameter 'alias' not provided.");
         }
 
         string? password = Request.Query["password"];
@@ -81,16 +81,16 @@ public class ApiController : Controller
             return BadRequest("parameter 'password' not provided.");
         }
 
-        if (!_omaService.AliasExists(name))
+        if (!_omaService.AliasExists(alias))
         {
             return Ok("alias does not exist.");
         }
-        if (_omaService.AliasHasPassword(name))
+        if (_omaService.AliasHasPassword(alias))
         {
             return Ok("alias password is already set.");
         }
 
-        if (!_omaService.SetAliasPassword(name, password))
+        if (!_omaService.SetAliasPassword(alias, password))
         {
             return Ok("password could not be set.");
         }
@@ -102,10 +102,10 @@ public class ApiController : Controller
     [HttpGet("unset_password")]
     public ActionResult UnsetPassword()
     {
-        string? name = Request.Query["name"];
-        if (string.IsNullOrEmpty(name))
+        string? alias = Request.Query["alias"];
+        if (string.IsNullOrEmpty(alias))
         {
-            return BadRequest("parameter 'name' not provided.");
+            return BadRequest("parameter 'alias' not provided.");
         }
 
         string? password = Request.Query["password"];
@@ -114,22 +114,22 @@ public class ApiController : Controller
             return BadRequest("parameter 'password' not provided.");
         }
 
-        if (!_omaService.AliasExists(name))
+        if (!_omaService.AliasExists(alias))
         {
             return Ok("alias does not exist.");
         }
 
-        if (!_omaService.AliasHasPassword(name))
+        if (!_omaService.AliasHasPassword(alias))
         {
             return Ok("alias does not have a password.");
         }
 
-        if (!_omaService.ValidateAliasPassword(name, password))
+        if (!_omaService.ValidateAliasPassword(alias, password))
         {
             return Ok("given password is invalid.");
         }
 
-        if (!_omaService.UnsetAliasPassword(name))
+        if (!_omaService.UnsetAliasPassword(alias))
         {
             return Ok("password could not be unset.");
         }
@@ -141,10 +141,10 @@ public class ApiController : Controller
     [HttpGet("add_lobby")]
     public ActionResult AddLobby()
     {
-        string? name = Request.Query["name"];
-        if (string.IsNullOrEmpty(name))
+        string? alias = Request.Query["alias"];
+        if (string.IsNullOrEmpty(alias))
         {
-            return BadRequest("parameter 'name' not provided.");
+            return BadRequest("parameter 'alias' not provided.");
         }
 
         string? lobby = Request.Query["lobby"];
@@ -175,12 +175,12 @@ public class ApiController : Controller
             return Ok("lobby value not a valid number.");
         }
 
-        if (!_omaService.AliasExists(name))
+        if (!_omaService.AliasExists(alias))
         {
             return Ok("alias does not exist");
         }
 
-        if (!_omaService.AddLobbyToAlias(name, lobbyId, bestOf, warmups))
+        if (!_omaService.AddLobbyToAlias(alias, lobbyId, bestOf, warmups))
         {
             return Ok("could not add lobby to alias.");
         }
@@ -192,10 +192,10 @@ public class ApiController : Controller
     [HttpGet("remove_lobby")]
     public ActionResult RemoveLobby()
     {
-        string? name = Request.Query["name"];
-        if (string.IsNullOrEmpty(name))
+        string? alias = Request.Query["alias"];
+        if (string.IsNullOrEmpty(alias))
         {
-            return BadRequest("parameter 'name' not provided.");
+            return BadRequest("parameter 'alias' not provided.");
         }
 
         string? lobby = Request.Query["lobby"];
@@ -211,12 +211,12 @@ public class ApiController : Controller
             return Ok("lobby value not a valid number.");
         }
 
-        if (!_omaService.AliasExists(name))
+        if (!_omaService.AliasExists(alias))
         {
             return Ok("alias does not exist");
         }
 
-        if (!_omaService.RemoveLobbyFromAlias(name, lobbyId))
+        if (!_omaService.RemoveLobbyFromAlias(alias, lobbyId))
         {
             return Ok("could not remove lobby from alias.");
         }

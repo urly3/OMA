@@ -1,5 +1,6 @@
 using OMA.Models;
 using System.IO.Hashing;
+using Microsoft.EntityFrameworkCore;
 
 namespace OMA.Data;
 
@@ -16,20 +17,18 @@ public class OMADataService
     {
         var hash = HashString(name);
 
-        var alias = _context.Aliases.FirstOrDefault(a => a.Hash == hash);
+        var alias = _context.Aliases.Include("Lobbies").FirstOrDefault(a => a.Hash == hash);
         if (alias == null)
         {
             return null;
         }
-
-        alias.Lobbies = _context.Lobbies.Where(l => l.Aliases.Contains(alias)).ToList();
 
         return alias;
     }
 
     internal Alias? GetAliasById(int id)
     {
-        return _context.Aliases.FirstOrDefault(a => a.Id == id);
+        return _context.Aliases.Include("Lobbies").FirstOrDefault(a => a.Id == id);
     }
 
     internal bool CreateAlias(string name)
