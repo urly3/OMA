@@ -138,13 +138,14 @@ public static class OMAImportService
         // cry about it.
         // maybe this should be async if perfomance is needed for some reason?
 
-        Internal::Match match = new();
-
-        match.BestOf = bestOf;
-        match.WarmupCount = warmups;
-        match.MultiId = (long)lobby.match?.id!;
-        match.StartTime = (DateTime)lobby.match?.start_time!;
-        match.StartTime = (DateTime)lobby.match?.end_time!;
+        Internal::Match match = new()
+        {
+            BestOf = bestOf,
+            WarmupCount = warmups,
+            MultiId = (long)lobby.match?.id!,
+            StartTime = (DateTime)lobby.match?.start_time!,
+            EndTime = (DateTime)lobby.match?.end_time!
+        };
 
         Dictionary<long, Internal::Team> playerTeams = new();
 
