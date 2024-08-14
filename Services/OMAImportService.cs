@@ -304,11 +304,20 @@ public static class OMAImportService
     {
         foreach (var user in match.Users)
         {
-            var scoresByUser = match.CompletedMaps.SelectMany(cm => cm.Scores.Where(s => s.UserId == user.UserId));
-            user.MapsPlayed = scoresByUser.Count();
+            var mapsUserPlayed = match.CompletedMaps.Where(m => m.Scores.Exists(s => s.UserId == user.UserId));
+            user.MapsPlayed = mapsUserPlayed.Count();
 
-            foreach (var score in scoresByUser)
+            if (user.MapsPlayed == 0)
             {
+                return;
+            }
+
+            float matchAvg = 0.0f;
+            float teamAvg = 0.0f;
+
+            foreach (var map in mapsUserPlayed)
+            {
+                var score = map.Scores.FirstOrDefault(s => s.UserId == user.UserId)!;
                 // highs.
                 if (user.HighestScore == 0 || score.TotalScore > user.HighestScore)
                 {
@@ -332,12 +341,19 @@ public static class OMAImportService
                 user.AverageScore += score.TotalScore;
                 user.AverageAccuracy += score.Accuracy;
 
-                // TODO:
-                // match cost
+                matchAvg += score.TotalScore / map.AverageScore;
+
+                teamAvg += user.Team == Internal::Team.Red
+                    ? (score.TotalScore / map.RedAverageScore)
+                    : (score.TotalScore / map.BlueAverageScore);
             }
 
             user.AverageScore /= user.MapsPlayed;
             user.AverageAccuracy /= user.MapsPlayed;
+
+            float cost = 2.0f / (user.MapsPlayed + 2);
+            user.MatchCostTotal = cost * matchAvg;
+            user.MatchCostTeam = cost * teamAvg;
         }
     }
 }
