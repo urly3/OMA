@@ -1,3 +1,7 @@
+! prevent duplicate lobbies from being created (that was kinda the point).
+- should they have different warmup / bestof: if they are the only lobby, change it.
+  otherwise, make a new one with different values and map that in the join table (ef will do that).
+
 state enums for more specific returns instead of bools.
 possibly factor out some logic (debating if that would be better).
 don't use ok for everything.
