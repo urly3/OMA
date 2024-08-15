@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc.Razor;
 using OMA.Data;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
+{
+    WebRootPath = Directory.GetCurrentDirectory() + "/oma.mvc/wwwroot",
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -23,7 +26,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles("/oma.mvc/wwwroot");
+app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 app.MapControllerRoute(
