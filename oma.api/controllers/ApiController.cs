@@ -180,6 +180,11 @@ public class ApiController : Controller
             return Ok("alias does not exist");
         }
 
+        if (_omaService.AliasHasPassword(alias))
+        {
+            return Ok("alias is locked.");
+        }
+
         if (!_omaService.AddLobbyToAlias(alias, lobbyId, bestOf, warmups))
         {
             return Ok("could not add lobby to alias.");
@@ -214,6 +219,11 @@ public class ApiController : Controller
         if (!_omaService.AliasExists(alias))
         {
             return Ok("alias does not exist");
+        }
+
+        if (_omaService.AliasHasPassword(alias))
+        {
+            return Ok("alias is locked.");
         }
 
         if (!_omaService.RemoveLobbyFromAlias(alias, lobbyId))
