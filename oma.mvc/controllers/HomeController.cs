@@ -1,26 +1,27 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using OMA.Models;
+using OMA.Services;
+using OMA.Data;
 
 namespace OMA.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private OMADataService _dataService;
+    private OMAService _omaService;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, OMADataService dataService)
     {
         _logger = logger;
+        _dataService = dataService;
+        _omaService = new(_dataService);
     }
 
     public IActionResult Index()
     {
-        return View();
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
+        return View(_omaService.GetMatches("kane") ?? []);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
