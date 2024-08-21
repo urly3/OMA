@@ -142,7 +142,8 @@ public static class OMAImportService
         {
             BestOf = bestOf,
             WarmupCount = warmups,
-            MultiId = (long)lobby.match?.id!,
+            LobbyId = (long)lobby.match?.id!,
+            Name = lobby.match?.name!,
             StartTime = (DateTime)lobby.match?.start_time!,
             EndTime = (DateTime)lobby.match?.end_time!
         };

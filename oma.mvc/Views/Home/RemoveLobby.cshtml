@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "remove lobby";
+}
+
+<div class="">
+    <h1>@ViewData["Title"]</h1>
+    <p>remove a lobby from the current alias.</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="RemoveLobby" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="control-label"> id </label>
+                    <input name="lobbyId" class="form-control" type="number" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

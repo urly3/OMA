@@ -1,0 +1,138 @@
+﻿@model OMA.Models.Internal.Match
+
+@{
+    ViewData["Title"] = Model.LobbyId;
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .row {
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+
+    .column {
+        float: left;
+        width: 50%;
+        padding: 5px;
+    }
+
+    /* Clearfix (clear floats) */
+    .row::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        border: 1px solid #ddd;
+    }
+
+    th,
+    td {
+        text-align: left;
+        padding: 16px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #d2d2d2;
+    }
+
+    .blue tr:nth-child(even) {
+        background-color: #a2a2f2;
+    }
+
+    .red tr:nth-child(even) {
+        background-color: #f2a2a2;
+    }
+</style>
+
+<div class="text-center">
+    <h1>@Model.Name</h1>
+    <hr>
+    <h3>@Model.BlueWins - @Model.RedWins</h3>
+    <div class=row>
+        <div class="column blue">
+            <table>
+                <tr>
+                    <th>username</th>
+                    <th>avg. score</th>
+                    <th>avg. acc</th>
+                    <th>cost. team</th>
+                    <th>cost. game</th>
+                </tr>
+                @foreach (var user in @Model.Users.Where(u => u.Team ==
+                OMA.Models.Internal.Team.Blue).OrderByDescending(u => u.MatchCostTotal))
+                {
+                    <tr>
+                        <td>@user.Username</td>
+                        <td>@user.AverageScore</td>
+                        <td>@user.AverageAccuracy.ToString("f2")%</td>
+                        <td>@user.MatchCostTeam.ToString("f2")</td>
+                        <td>@user.MatchCostTotal.ToString("f2")</td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="column red">
+            <table>
+                <tr>
+                    <th>username</th>
+                    <th>avg. score</th>
+                    <th>avg. acc</th>
+                    <th>cost. team</th>
+                    <th>cost. game</th>
+                </tr>
+                @foreach (var user in @Model.Users.Where(u => u.Team ==
+                OMA.Models.Internal.Team.Red).OrderByDescending(u => u.MatchCostTotal))
+                {
+                    <tr>
+                        <td>@user.Username</td>
+                        <td>@user.AverageScore</td>
+                        <td>@user.AverageAccuracy.ToString("f2")%</td>
+                        <td>@user.MatchCostTeam.ToString("f2")</td>
+                        <td>@user.MatchCostTotal.ToString("f2")</td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="column">
+            <table>
+                <tr>
+                    <th>highest avg. score</th>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>highest avg. acc</th>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <hr>
+        <h3>beatmaps</h3>
+        <table>
+            <tr>
+                <th>
+                    set id
+                </th>
+                <th>
+                    name
+                </th>
+                <th>
+                    diff
+                </th>
+                <th>
+                    sr
+                </th>
+            </tr>
+        </table>
+    </div>
+</div>

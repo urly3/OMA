@@ -9,7 +9,8 @@ enum Team
 
 class Match
 {
-    public long MultiId { get; set; }
+    public long LobbyId { get; set; }
+    public string Name { get; set; } = "";
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public int BestOf { get; set; } = 0;
