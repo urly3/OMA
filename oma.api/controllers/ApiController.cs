@@ -7,12 +7,12 @@ namespace OMA.Controllers;
 
 [Route("/api")]
 public class ApiController : Controller {
-    private OMADataService _dataService;
+    private OMAContext _context;
     private OMAService _omaService;
 
-    public ApiController(OMADataService dataService) {
-        _dataService = dataService;
-        _omaService = new(dataService);
+    public ApiController(OMAContext context) {
+        _context = context;
+        _omaService = new(context);
     }
 
     public ActionResult Index() {

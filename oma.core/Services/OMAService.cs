@@ -6,64 +6,64 @@ using OMA.Models.Internal;
 namespace OMA.Services;
 
 class OMAService {
-    private OMADataService _dataService;
+    private OMAContext _context;
 
-    public OMAService(OMADataService dataService) {
-        _dataService = dataService;
+    public OMAService(OMAContext context) {
+        _context = context;
     }
 
     public bool AliasExists(string name) {
-        return _dataService.GetAlias(name) != null;
+        return _context.GetAlias(name) != null;
     }
 
+    // this should only be called after AliasExists, so we know the
+    // alias is not null.
     public bool AliasHasPassword(string name) {
-        // this should only be called after AliasExists, so we know the
-        // alias is not null.
-        return _dataService.GetAlias(name)?.Password != null;
+        return _context.GetAlias(name)?.Password != null;
     }
 
     public bool ValidateAliasPassword(string name, string password) {
-        var alias = _dataService.GetAlias(name);
+        var alias = _context.GetAlias(name);
         if (alias == null) {
             return false;
         }
 
-        var passwordHash = _dataService.HashString(password);
+        var passwordHash = _context.HashString(password);
 
         return alias.Password == passwordHash;
     }
 
     public Alias? GetAlias(string name) {
-        return _dataService.GetAlias(name);
+        return _context.GetAlias(name);
     }
 
     public AliasDto? GetAliasAsDto(string name) {
-        AliasDto dto = new(_dataService.GetAlias(name));
+        AliasDto dto = new(_context.GetAlias(name));
 
         return dto.Id == -1 ? null : dto;
     }
 
     public Alias? GetAliasFromDto(AliasDto dto) {
-        return _dataService.GetAliasById(dto.Id);
+        return _context.GetAliasById(dto.Id);
     }
 
     public Alias? CreateAlias(string name) {
-        if (_dataService.GetAlias(name) != null) {
+        if (_context.GetAlias(name) != null) {
             return null;
         }
 
-        if (!_dataService.CreateAlias(name)) {
+        if (!_context.CreateAlias(name)) {
             return null;
         }
 
-        return _dataService.GetAlias(name);
+        return _context.GetAlias(name);
     }
 
     public Alias? GetOrCreateAlias(string name) {
-        Alias? alias = _dataService.GetAlias(name);
+        Alias? alias = _context.GetAlias(name);
         if (alias == null) {
-            _ = _dataService.CreateAlias(name);
-            alias = _dataService.GetAlias(name);
+            _ = _context.CreateAlias(name);
+            alias = _context.GetAlias(name);
         }
 
         return alias;
@@ -80,7 +80,7 @@ class OMAService {
             return false;
         }
 
-        return _dataService.SetAliasPassword(alias, password);
+        return _context.SetAliasPassword(alias, password);
     }
 
     public bool UnsetAliasPassword(string name) {
@@ -94,7 +94,7 @@ class OMAService {
             return false;
         }
 
-        return _dataService.RemoveAliasPassword(alias);
+        return _context.RemoveAliasPassword(alias);
     }
 
     public bool AddLobbyToAlias(string name, long lobbyId, int bestOf, int warmups) {
@@ -107,6 +107,14 @@ class OMAService {
             return false;
         }
 
+        var existingLobby = _context.GetLobbyEqual(lobbyId, bestOf, warmups);
+
+        if (existingLobby != null) {
+            return _context.AddLobbyToAlias(alias, existingLobby);
+        }
+
+        // we don't have that exact lobby stored in the database, start to make a new one.
+
         if (!OMAImportService.DoesLobbyExist(lobbyId)) {
             return false;
         }
@@ -117,7 +125,7 @@ class OMAService {
             Warmups = warmups,
         };
 
-        return _dataService.AddLobbyToAlias(alias, lobby);
+        return _context.AddLobbyToAlias(alias, lobby);
     }
 
     public bool RemoveLobbyFromAlias(string name, long lobbyId) {
@@ -132,7 +140,7 @@ class OMAService {
 
         var lobby = alias.Lobbies.FirstOrDefault(x => x.LobbyId == lobbyId);
 
-        return lobby != null ? _dataService.RemoveLobbyFromAlias(alias, lobby) : false;
+        return lobby != null ? _context.RemoveLobbyFromAlias(alias, lobby) : false;
     }
 
     public Match? GetMatch(long lobby, int bestOf, int warmups) {

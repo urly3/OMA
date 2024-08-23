@@ -9,13 +9,13 @@ namespace OMA.Controllers;
 
 public class HomeController : Controller {
     private readonly ILogger<HomeController> _logger;
-    private OMADataService _dataService;
+    private OMAContext _context;
     private OMAService _omaService;
 
-    public HomeController(ILogger<HomeController> logger, OMADataService dataService) {
+    public HomeController(ILogger<HomeController> logger, OMAContext context) {
         _logger = logger;
-        _dataService = dataService;
-        _omaService = new(_dataService);
+        _context = context;
+        _omaService = new(_context);
     }
 
     public IActionResult Index() {

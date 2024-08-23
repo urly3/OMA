@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions() {
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<OMADataService>();
+builder.Services.AddScoped<OMAContext>();
 builder.Services.Configure<RazorViewEngineOptions>(o => {
     o.ViewLocationFormats.Clear();
     o.ViewLocationFormats.Add("/oma.mvc/Views/{1}/{0}" + RazorViewEngine.ViewExtension);
