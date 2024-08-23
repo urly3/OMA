@@ -1,7 +1,6 @@
 namespace OMA.Models.Internal;
 
-class Score
-{
+class Score {
     public long UserId { get; set; }
     public long TotalScore { get; set; }
     public float Accuracy { get; set; }

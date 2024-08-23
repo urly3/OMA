@@ -1,7 +1,6 @@
 namespace OMA.Models.Imported;
 
-public record Score
-{
+public record Score {
     public float accuracy { get; set; }
     public object? best_id { get; set; }
     public DateTime created_at { get; set; }

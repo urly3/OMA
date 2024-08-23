@@ -1,7 +1,6 @@
 namespace OMA.Models;
 
-public record Lobby
-{
+public record Lobby {
     public int Id { get; set; }
     public long LobbyId { get; set; }
     public string LobbyName { get; set; } = "";

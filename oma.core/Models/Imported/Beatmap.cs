@@ -1,7 +1,6 @@
 namespace OMA.Models.Imported;
 
-public record Beatmap
-{
+public record Beatmap {
     public long beatmapset_id { get; set; }
     public float difficulty_rating { get; set; }
     public long id { get; set; }

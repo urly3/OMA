@@ -2,8 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace OMA.Models.Imported;
 
-public record Covers
-{
+public record Covers {
     public string? cover { get; set; }
 
     [JsonPropertyName("cover@2x")]

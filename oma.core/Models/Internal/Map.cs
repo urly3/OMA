@@ -1,7 +1,6 @@
 namespace OMA.Models.Internal;
 
-class Map
-{
+class Map {
     public long BeatmapId { get; set; }
     public long BeatmapSetId { get; set; }
     public string CoverUrl { get; set; } = "oma_init";

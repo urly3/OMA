@@ -1,14 +1,12 @@
 namespace OMA.Models.Internal;
 
-enum Team
-{
+enum Team {
     None,
     Blue,
     Red,
 }
 
-class Match
-{
+class Match {
     public long LobbyId { get; set; }
     public string Name { get; set; } = "";
     public DateTime StartTime { get; set; }

@@ -2,52 +2,43 @@
 
 #nullable disable
 
-namespace OMA.Migrations
-{
+namespace OMA.Migrations {
     /// <inheritdoc />
-    public partial class Init : Migration
-    {
+    public partial class Init : Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.CreateTable(
                 name: "Aliases",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Hash = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Aliases", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Lobbies",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     LobbyId = table.Column<long>(type: "INTEGER", nullable: false),
                     BestOf = table.Column<int>(type: "INTEGER", nullable: false),
                     Warmups = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Lobbies", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "AliasLobby",
-                columns: table => new
-                {
+                columns: table => new {
                     AliasesId = table.Column<int>(type: "INTEGER", nullable: false),
                     LobbiesId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AliasLobby", x => new { x.AliasesId, x.LobbiesId });
                     table.ForeignKey(
                         name: "FK_AliasLobby_Aliases_AliasesId",
@@ -70,8 +61,7 @@ namespace OMA.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropTable(
                 name: "AliasLobby");
 

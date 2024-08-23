@@ -1,7 +1,6 @@
 namespace OMA.Models.Imported;
 
-public record Game
-{
+public record Game {
     public long beatmap_id { get; set; }
     public long id { get; set; }
     public DateTime? start_time { get; set; }

@@ -1,7 +1,6 @@
 namespace OMA.Models;
 
-public record Alias
-{
+public record Alias {
     public int Id { get; set; }
     public List<Lobby> Lobbies { get; set; } = [];
     public string Hash { get; set; } = default!;

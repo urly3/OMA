@@ -1,7 +1,6 @@
 namespace OMA.Models.Imported;
 
-public record User
-{
+public record User {
     public string? avatar_url { get; set; }
     public string? country_code { get; set; }
     public string? default_group { get; set; }
