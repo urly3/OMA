@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OMA.Services;
+using OMA.Core;
 using OMA.Data;
 using OMA.Models.Dto;
 
@@ -68,18 +69,13 @@ public class ApiController : Controller {
             return BadRequest("parameter 'password' not provided.");
         }
 
-        if (!_omaService.AliasExists(alias)) {
-            return Ok("alias does not exist.");
+        switch (_omaService.SetAliasPassword(alias, password)) {
+            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
+            case OMAStatus.AliasIsLocked: return BadRequest("alias is locked.");
+            case OMAStatus.PasswordCouldNotBeSet: throw new Exception("password could not be set.");
+            case OMAStatus.PasswordSet: return Ok("password set.");
+            default: throw new Exception("unhandled state.");
         }
-        if (_omaService.AliasHasPassword(alias)) {
-            return Ok("alias password is already set.");
-        }
-
-        if (!_omaService.SetAliasPassword(alias, password)) {
-            return Ok("password could not be set.");
-        }
-
-        return Ok("password set.");
     }
 
     // change to post(?) when things are more concrete.
@@ -95,23 +91,13 @@ public class ApiController : Controller {
             return BadRequest("parameter 'password' not provided.");
         }
 
-        if (!_omaService.AliasExists(alias)) {
-            return Ok("alias does not exist.");
+        switch (_omaService.UnsetAliasPassword(alias)) {
+            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
+            case OMAStatus.AliasIsUnlocked: return BadRequest("alias is already unlocked.");
+            case OMAStatus.PasswordCouldNotBeSet: throw new Exception("password could not unset.");
+            case OMAStatus.PasswordSet: return Ok("password unset.");
+            default: throw new Exception("unhandled state.");
         }
-
-        if (!_omaService.AliasHasPassword(alias)) {
-            return Ok("alias does not have a password.");
-        }
-
-        if (!_omaService.ValidateAliasPassword(alias, password)) {
-            return Ok("given password is invalid.");
-        }
-
-        if (!_omaService.UnsetAliasPassword(alias)) {
-            return Ok("password could not be unset.");
-        }
-
-        return Ok("password unset.");
     }
 
     // change to post(?) when more concrete.
@@ -146,19 +132,15 @@ public class ApiController : Controller {
             return Ok("lobby value not a valid number.");
         }
 
-        if (!_omaService.AliasExists(alias)) {
-            return Ok("alias does not exist");
+        switch (_omaService.AddLobbyToAlias(alias, lobbyId, bestOf, warmups)) {
+            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
+            case OMAStatus.AliasIsLocked: return BadRequest("alias is locked.");
+            case OMAStatus.AliasContainsLobby: return BadRequest("alias already contained lobby.");
+            case OMAStatus.LobbyDoesNotExist: return BadRequest("lobby does not exist.");
+            case OMAStatus.LobbyCouldNotBeAdded: throw new Exception("lobby could not be added.");
+            case OMAStatus.LobbyAdded: return Ok("lobby added.");
+            default: throw new Exception("unhandled state.");
         }
-
-        if (_omaService.AliasHasPassword(alias)) {
-            return Ok("alias is locked.");
-        }
-
-        if (!_omaService.AddLobbyToAlias(alias, lobbyId, bestOf, warmups)) {
-            return Ok("could not add lobby to alias.");
-        }
-
-        return Ok("lobby added to alias.");
     }
 
     // change to post(?) when more concrete.
@@ -188,11 +170,15 @@ public class ApiController : Controller {
             return Ok("alias is locked.");
         }
 
-        if (!_omaService.RemoveLobbyFromAlias(alias, lobbyId)) {
-            return Ok("could not remove lobby from alias.");
+        switch (_omaService.RemoveLobbyFromAlias(alias, lobbyId)) {
+            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
+            case OMAStatus.AliasIsLocked: return BadRequest("alias is locked.");
+            case OMAStatus.AliasDoesNotContainLobby: return BadRequest("alias does not contain lobby.");
+            case OMAStatus.LobbyDoesNotExist: return BadRequest("lobby does not exist.");
+            case OMAStatus.LobbyCouldNotBeRemoved: throw new Exception("lobby could not be removed.");
+            case OMAStatus.LobbyRemoved: return Ok("lobby removed.");
+            default: throw new Exception("unhandled state.");
         }
-
-        return Ok("lobby removed from alias.");
     }
 
     [HttpGet("get_match")]

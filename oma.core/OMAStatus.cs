@@ -1,4 +1,4 @@
-namespace OMA.Services;
+namespace OMA.Core;
 
 enum OMAStatus {
     ActionFailed,
@@ -6,12 +6,20 @@ enum OMAStatus {
     AliasCrated,
     AliasDoesNotExist,
     AliasExists,
-    AliasLocked,
-    AliasUnlocked,
+    AliasIsLocked,
+    AliasIsUnlocked,
+    AliasContainsLobby,
+    AliasDoesNotContainLobby,
     InvalidPassword,
+    PasswordSet,
+    PasswordCouldNotBeSet,
+    PasswordMatches,
+    PasswordDoesNotMatch,
 
     LobbyAdded,
+    LobbyCouldNotBeAdded,
     LobbyRemoved,
+    LobbyCouldNotBeRemoved,
     LobbyDoesNotExist,
 
     MatchBadResponse,
