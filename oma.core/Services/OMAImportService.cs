@@ -299,8 +299,8 @@ public static class OMAImportService {
                     : (score.TotalScore / map.BlueAverageScore);
             }
 
-            user.AverageScore /= user.MapsPlayed;
-            user.AverageAccuracy /= user.MapsPlayed;
+            user.AverageScore = (user.AverageScore / user.MapsPlayed) * 100;
+            user.AverageAccuracy = (user.AverageAccuracy / user.MapsPlayed) * 100;
 
             float cost = 2.0f / (user.MapsPlayed + 2);
             user.MatchCostTotal = cost * matchAvg;
