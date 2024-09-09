@@ -105,14 +105,30 @@
         <div class="column">
             <table>
                 <tr>
-                    <th>highest avg. score</th>
-                    <td></td>
-                    <td></td>
+                    @{
+                        var highestScoreUser = Model.Users.MaxBy(u => u.AverageScore)!;
+
+                        <th>highest avg. score</th>
+                        <td>
+                            @highestScoreUser.Username
+                        </td>
+                        <td>
+                            @highestScoreUser.AverageScore.ToString()
+                        </td>
+                    }
                 </tr>
                 <tr>
-                    <th>highest avg. acc</th>
-                    <td></td>
-                    <td></td>
+                    @{
+                        var highestAccUser = Model.Users.MaxBy(u => u.AverageAccuracy)!;
+
+                        <th>highest avg. acc</th>
+                        <td>
+                            @highestAccUser.Username
+                        </td>
+                        <td>
+                            @highestAccUser.AverageAccuracy.ToString("f2")%
+                        </td>
+                    }
                 </tr>
             </table>
         </div>
