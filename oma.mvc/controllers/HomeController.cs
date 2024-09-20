@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using OMA.Models;
+using OMA.Models.Dto;
 using OMA.Services;
 using OMA.Data;
 using Internal = OMA.Models.Internal;
@@ -19,7 +20,18 @@ public class HomeController : Controller {
     }
 
     public IActionResult Index() {
-        var lobbies = _omaService.GetAliasAsDto("kane")?.Lobbies;
+        List<LobbyDto> lobbies = [];
+
+        var aliasHash = Request.Cookies["aliasHash"];
+        if (!string.IsNullOrEmpty(aliasHash)) {
+            var aliasDto = _omaService.GetAliasAsDto(aliasHash);
+            if (aliasDto == null) {
+                // reset the cookie.
+            } else {
+                lobbies = aliasDto.Lobbies;
+            }
+        }
+
         return View(lobbies);
     }
 
@@ -40,6 +52,39 @@ public class HomeController : Controller {
         match = _omaService.GetMatch(lobbyId, 0, 0);
 
         return View(match);
+    }
+
+    [HttpGet("viewaliaslobby")]
+    public IActionResult ViewAliasLobby() {
+        Internal::Match? match = null;
+
+        string? lobby = Request.Query["lobby"];
+        if (string.IsNullOrEmpty(lobby)) {
+            return BadRequest("lobby not provided.");
+        }
+
+        long lobbyId;
+        if (!long.TryParse(lobby, out lobbyId)) {
+            return BadRequest("lobbyId not a valid number.");
+        }
+
+        string? aliasHash = Request.Cookies["aliasHash"];
+        if (!string.IsNullOrEmpty(aliasHash)) {
+            var aliasDto = _omaService.GetAliasAsDto(aliasHash);
+
+            if (aliasDto != null) {
+                var lobbyDto = aliasDto.Lobbies.FirstOrDefault(l => l.Id == lobbyId);
+                if (lobbyDto != null) {
+                    match = _omaService.GetMatch(lobbyDto.LobbyId, lobbyDto.BestOf, lobbyDto.Warmups);
+                }
+            }
+        }
+
+        if (match == null) {
+            return BadRequest("lobby does not exist.");
+        }
+        
+        return View("ViewLobby", match);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
