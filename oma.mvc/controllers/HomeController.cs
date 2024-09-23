@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using OMA.Models;
 using OMA.Models.Dto;
@@ -22,14 +23,10 @@ public class HomeController : Controller {
     public IActionResult Index() {
         List<LobbyDto> lobbies = [];
 
-        var aliasHash = Request.Cookies["aliasHash"];
-        if (!string.IsNullOrEmpty(aliasHash)) {
-            var aliasDto = _omaService.GetAliasAsDto(aliasHash);
-            if (aliasDto == null) {
-                // reset the cookie.
-            } else {
-                lobbies = aliasDto.Lobbies;
-            }
+        var aliasDto = CheckAndGetAliasDtoFromCookie();
+
+        if (aliasDto != null) {
+            lobbies = aliasDto.Lobbies;
         }
 
         return View(lobbies);
@@ -68,16 +65,14 @@ public class HomeController : Controller {
             return BadRequest("lobbyId not a valid number.");
         }
 
-        string? aliasHash = Request.Cookies["aliasHash"];
-        if (!string.IsNullOrEmpty(aliasHash)) {
-            var aliasDto = _omaService.GetAliasAsDto(aliasHash);
+        var aliasDto = CheckAndGetAliasDtoFromCookie();
+        if (aliasDto == null) {
+            return BadRequest("alias does not exist.");
+        }
 
-            if (aliasDto != null) {
-                var lobbyDto = aliasDto.Lobbies.FirstOrDefault(l => l.Id == lobbyId);
-                if (lobbyDto != null) {
-                    match = _omaService.GetMatch(lobbyDto.LobbyId, lobbyDto.BestOf, lobbyDto.Warmups);
-                }
-            }
+        var lobbyDto = aliasDto.Lobbies.FirstOrDefault(l => l.Id == lobbyId);
+        if (lobbyDto != null) {
+            match = _omaService.GetMatch(lobbyDto.LobbyId, lobbyDto.BestOf, lobbyDto.Warmups);
         }
 
         if (match == null) {
@@ -87,8 +82,27 @@ public class HomeController : Controller {
         return View("ViewLobby", match);
     }
 
+    [HttpPost("setalias")]
+    public IActionResult SetAlias() {
+        return Redirect("");
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    private AliasDto? CheckAndGetAliasDtoFromCookie() {
+        var aliasHash = Request.Cookies["aliasHash"];
+        if (string.IsNullOrEmpty(aliasHash)) {
+            return null;
+        }
+
+        var aliasDto = _omaService.GetAliasAsDto(aliasHash);
+        // if (aliasDto == null) {
+        //     Response.Cookies.Delete("aliasHash");
+        // }
+
+        return aliasDto;
     }
 }
