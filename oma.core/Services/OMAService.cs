@@ -44,6 +44,12 @@ class OMAService {
         return dto.Id == -1 ? null : dto;
     }
 
+    public AliasDto? GetAliasAsDtoFromHash(string hash) {
+        AliasDto dto = new(_context.GetAliasFromHash(hash));
+
+        return dto.Id == -1 ? null : dto;
+    }
+
     public Alias? GetAliasFromDto(AliasDto dto) {
         return _context.GetAliasById(dto.Id);
     }
@@ -179,5 +185,9 @@ class OMAService {
         catch {
             return [];
         }
+    }
+
+    public string HashString(string alias) {
+        return _context.HashString(alias);
     }
 }

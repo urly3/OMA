@@ -84,7 +84,17 @@ public class HomeController : Controller {
 
     [HttpPost("setalias")]
     public IActionResult SetAlias() {
-        return Redirect("");
+        string? alias = Request.Form["alias"];
+
+        if (string.IsNullOrEmpty(alias)) {
+            return Redirect("/");
+        }
+
+        string aliasHash = _omaService.HashString(alias);
+
+        Response.Cookies.Append("aliasHash", aliasHash);
+
+        return Redirect("/");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -98,7 +108,7 @@ public class HomeController : Controller {
             return null;
         }
 
-        var aliasDto = _omaService.GetAliasAsDto(aliasHash);
+        var aliasDto = _omaService.GetAliasAsDtoFromHash(aliasHash);
         // if (aliasDto == null) {
         //     Response.Cookies.Delete("aliasHash");
         // }

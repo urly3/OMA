@@ -27,6 +27,15 @@ public class OMAContext : DbContext {
         return alias;
     }
 
+    internal Alias? GetAliasFromHash(string hash) {
+        var alias = Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Hash == hash);
+        if (alias == null) {
+            return null;
+        }
+
+        return alias;
+    }
+
     internal Alias? GetAliasById(int id) {
         return Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Id == id);
     }
