@@ -11,11 +11,11 @@
             <form asp-action="AddLobby" enctype="multipart/form-data">
                 <div class="form-group">
                     <label class="control-label"> id </label>
-                    <input name="lobbyId" class="form-control" type="number" placeholder="11223344" min="0" required />
-                    <label class="control-label">(opt.) best of</label>
+                    <input name="lobby" class="form-control" type="number" placeholder="11223344" min="0" required />
+                    <label class="control-label">best of (opt.)</label>
                     <input name="bestOf" class="form-control" type="number" placeholder="0" min="0" />
-                    <label class="control-label">(opt.) warmup count </label>
-                    <input name="warmupCount" class="form-control" tySpe="number" placeholder="0" min="0" />
+                    <label class="control-label">warmups (opt.)</label>
+                    <input name="warmups" class="form-control" type="number" placeholder="0" min="0" />
                     <hr>
                     <input class="btn btn-primary" type="submit" value="add" />
                 </div>

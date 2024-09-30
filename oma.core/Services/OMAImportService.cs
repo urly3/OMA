@@ -165,8 +165,7 @@ public static class OMAImportService {
 
             if (map.Scores.All(s => s.TotalScore == 0)) {
                 match.AbandonedMaps.Add(map);
-            }
-            else {
+            } else {
                 match.CompletedMaps.Add(map);
             }
         }
@@ -224,8 +223,7 @@ public static class OMAImportService {
                 if (setBy.Team == Internal::Team.Blue) {
                     blueTotalScore += score.TotalScore;
                     ++blueScoreCount;
-                }
-                else {
+                } else {
                     redTotalScore += score.TotalScore;
                     ++redScoreCount;
                 }
@@ -241,8 +239,7 @@ public static class OMAImportService {
 
             if (blueTotalScore > redTotalScore) {
                 ++blueWins;
-            }
-            else {
+            } else {
                 ++redWins;
             }
         }

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using System.IO.Hashing;
 using OMA.Models;
 
 namespace OMA.Data;
@@ -16,19 +15,8 @@ public class OMAContext : DbContext {
         optionsBuilder.UseSqlite(_connectionString);
     }
 
-    internal Alias? GetAlias(string name) {
-        var hash = HashString(name);
-
-        var alias = Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Hash == hash);
-        if (alias == null) {
-            return null;
-        }
-
-        return alias;
-    }
-
-    internal Alias? GetAliasFromHash(string hash) {
-        var alias = Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Hash == hash);
+    internal Alias? GetAlias(string aliasHash) {
+        var alias = Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Hash == aliasHash);
         if (alias == null) {
             return null;
         }
@@ -40,17 +28,7 @@ public class OMAContext : DbContext {
         return Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Id == id);
     }
 
-    internal bool CreateAlias(string name) {
-        var hash = HashString(name);
-
-        Aliases.Add(new() {
-            Hash = hash,
-        });
-
-        return SaveChanges() != 0;
-    }
-
-    internal bool CreateAliasFromHash(string aliasHash) {
+    internal bool CreateAlias(string aliasHash) {
         Aliases.Add(new() {
             Hash = aliasHash,
         });
@@ -72,10 +50,8 @@ public class OMAContext : DbContext {
         return SaveChanges() != 0;
     }
 
-    internal bool SetAliasPassword(Alias alias, string password) {
-        var hash = HashString(password);
-
-        alias.Password = hash;
+    internal bool SetAliasPassword(Alias alias, string passwordHash) {
+        alias.Password = passwordHash;
         Aliases.Update(alias);
 
         return SaveChanges() != 0;
@@ -86,11 +62,6 @@ public class OMAContext : DbContext {
         Aliases.Update(alias);
 
         return SaveChanges() != 0;
-    }
-
-    internal string HashString(string value) {
-        var hashBytes = XxHash128.Hash(System.Text.Encoding.UTF8.GetBytes(value));
-        return System.Text.Encoding.UTF8.GetString(hashBytes);
     }
 
     internal Lobby? GetLobbyEqual(long lobbyId, int bestOf, int warmups) {

@@ -17,7 +17,7 @@ public class ApiController : Controller {
     }
 
     public ActionResult Index() {
-        AliasDto? dto = _omaService.GetAliasAsDto("kane");
+        AliasDto? dto = _omaService.GetAliasAsDto(OMAUtil.HashString("kane"));
         if (dto != null) {
             return Ok(dto);
         }
@@ -132,7 +132,9 @@ public class ApiController : Controller {
             return Ok("lobby value not a valid number.");
         }
 
-        switch (_omaService.AddLobbyToAlias(alias, lobbyId, bestOf, warmups)) {
+        var lobbyName = Request.Query["lobbyName"];
+
+        switch (_omaService.AddLobbyToAlias(alias, lobbyId, bestOf, warmups, lobbyName)) {
             case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
             case OMAStatus.AliasIsLocked: return BadRequest("alias is locked.");
             case OMAStatus.AliasContainsLobby: return BadRequest("alias already contained lobby.");

@@ -13,39 +13,31 @@ class OMAService {
         _context = context;
     }
 
-    public bool AliasExists(string name) {
-        return _context.GetAlias(name) != null;
+    public bool AliasExists(string aliasHash) {
+        return _context.GetAlias(aliasHash) != null;
     }
 
     // this should only be called after AliasExists, so we know the
     // alias is not null.
-    public bool AliasHasPassword(string name) {
-        return _context.GetAlias(name)?.Password != null;
+    public bool AliasHasPassword(string aliasHash) {
+        return _context.GetAlias(aliasHash)?.Password != null;
     }
 
-    public OMAStatus AliasPasswordIsValid(string name, string password) {
-        var alias = _context.GetAlias(name);
+    public OMAStatus AliasPasswordIsValid(string aliasHash, string passwordHash) {
+        var alias = _context.GetAlias(aliasHash);
         if (alias == null) {
             return OMAStatus.AliasDoesNotExist;
         }
 
-        var passwordHash = _context.HashString(password);
-
         return alias.Password == passwordHash ? OMAStatus.PasswordMatches : OMAStatus.PasswordDoesNotMatch;
     }
 
-    public Alias? GetAlias(string name) {
-        return _context.GetAlias(name);
+    public Alias? GetAlias(string aliasHash) {
+        return _context.GetAlias(aliasHash);
     }
 
-    public AliasDto? GetAliasAsDto(string name) {
-        AliasDto dto = new(_context.GetAlias(name));
-
-        return dto.Id == -1 ? null : dto;
-    }
-
-    public AliasDto? GetAliasAsDtoFromHash(string hash) {
-        AliasDto dto = new(_context.GetAliasFromHash(hash));
+    public AliasDto? GetAliasAsDto(string aliasHash) {
+        AliasDto dto = new(_context.GetAlias(aliasHash));
 
         return dto.Id == -1 ? null : dto;
     }
@@ -54,30 +46,30 @@ class OMAService {
         return _context.GetAliasById(dto.Id);
     }
 
-    public Alias? CreateAlias(string name) {
-        if (_context.GetAlias(name) != null) {
+    public Alias? CreateAlias(string aliasHash) {
+        if (_context.GetAlias(aliasHash) != null) {
             return null;
         }
 
-        if (!_context.CreateAlias(name)) {
+        if (!_context.CreateAlias(aliasHash)) {
             return null;
         }
 
-        return _context.GetAlias(name);
+        return _context.GetAlias(aliasHash);
     }
 
-    public Alias? GetOrCreateAlias(string name) {
-        Alias? alias = _context.GetAlias(name);
+    public Alias? GetOrCreateAlias(string aliasHash) {
+        Alias? alias = _context.GetAlias(aliasHash);
         if (alias == null) {
-            _ = _context.CreateAlias(name);
-            alias = _context.GetAlias(name);
+            _ = _context.CreateAlias(aliasHash);
+            alias = _context.GetAlias(aliasHash);
         }
 
         return alias;
     }
 
-    public OMAStatus SetAliasPassword(string name, string password) {
-        Alias? alias = GetAlias(name);
+    public OMAStatus SetAliasPassword(string aliasHash, string passwordHash) {
+        Alias? alias = GetAlias(aliasHash);
 
         if (alias == null) {
             return OMAStatus.AliasDoesNotExist;
@@ -87,11 +79,11 @@ class OMAService {
             return OMAStatus.AliasIsLocked;
         }
 
-        return _context.SetAliasPassword(alias, password) ? OMAStatus.PasswordSet : OMAStatus.PasswordCouldNotBeSet;
+        return _context.SetAliasPassword(alias, passwordHash) ? OMAStatus.PasswordSet : OMAStatus.PasswordCouldNotBeSet;
     }
 
-    public OMAStatus UnsetAliasPassword(string name) {
-        Alias? alias = GetAlias(name);
+    public OMAStatus UnsetAliasPassword(string aliasHash) {
+        Alias? alias = GetAlias(aliasHash);
 
         if (alias == null) {
             return OMAStatus.AliasDoesNotExist;
@@ -104,14 +96,21 @@ class OMAService {
         return _context.RemoveAliasPassword(alias) ? OMAStatus.PasswordSet : OMAStatus.PasswordCouldNotBeSet;
     }
 
-    public OMAStatus AddLobbyToAlias(string name, long lobbyId, int bestOf, int warmups) {
-        Alias? alias = GetAlias(name);
+    public OMAStatus AddLobbyToAlias(string aliasHash, long lobbyId, int bestOf, int warmups, string? lobbyName, bool createIfNull = false) {
+        Alias? alias = GetAlias(aliasHash);
         if (alias == null) {
-            return OMAStatus.AliasDoesNotExist;
-        }
+            if (!createIfNull) {
+                return OMAStatus.AliasDoesNotExist;
+            }
 
-        if (alias.Password != null) {
-            return OMAStatus.AliasIsLocked;
+            alias = CreateAlias(aliasHash);
+            if (alias == null) {
+                return OMAStatus.AliasCouldNotBeCreated;
+            }
+        } else {
+            if (alias.Password != null) {
+                return OMAStatus.AliasIsLocked;
+            }
         }
 
         var existingLobby = _context.GetLobbyEqual(lobbyId, bestOf, warmups);
@@ -120,6 +119,7 @@ class OMAService {
             if (alias.Lobbies.Contains(existingLobby)) {
                 return OMAStatus.AliasContainsLobby;
             }
+
             return _context.AddLobbyToAlias(alias, existingLobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
         }
 
@@ -129,55 +129,22 @@ class OMAService {
             return OMAStatus.LobbyDoesNotExist;
         }
 
-        Lobby lobby = new() {
-            LobbyId = lobbyId,
-            BestOf = bestOf,
-            Warmups = warmups,
-        };
-
-        return _context.AddLobbyToAlias(alias, lobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
-    }
-
-    public OMAStatus AddLobbyToAliasOrCreateFromHash(string aliasHash, long lobbyId, int bestOf, int warmups) {
-        Alias? alias = _context.GetAliasFromHash(aliasHash);
-        if (alias == null) {
-            if (!_context.CreateAliasFromHash(aliasHash)) {
-                return OMAStatus.AliasCouldNotBeCreated;
-            } else {
-                alias = _context.GetAliasFromHash(aliasHash)!;
-            }
-        }
-
-        if (alias.Password != null) {
-            return OMAStatus.AliasIsLocked;
-        }
-
-        var existingLobby = _context.GetLobbyEqual(lobbyId, bestOf, warmups);
-
-        if (existingLobby != null) {
-            if (alias.Lobbies.Contains(existingLobby)) {
-                return OMAStatus.AliasContainsLobby;
-            }
-            return _context.AddLobbyToAlias(alias, existingLobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
-        }
-
-        // we don't have that exact lobby (lobbyid, bestof, warmup) stored in the database, start to make a new one.
-
-        if (!OMAImportService.DoesLobbyExist(lobbyId)) {
-            return OMAStatus.LobbyDoesNotExist;
+        if (string.IsNullOrWhiteSpace(lobbyName)) {
+            lobbyName = OMAImportService.GetMatch(lobbyId).Name;
         }
 
         Lobby lobby = new() {
             LobbyId = lobbyId,
             BestOf = bestOf,
             Warmups = warmups,
+            LobbyName = lobbyName
         };
 
         return _context.AddLobbyToAlias(alias, lobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
     }
 
-    public OMAStatus RemoveLobbyFromAlias(string name, long lobbyId) {
-        Alias? alias = GetAlias(name);
+    public OMAStatus RemoveLobbyFromAlias(string aliasHash, long lobbyId) {
+        Alias? alias = GetAlias(aliasHash);
         if (alias == null) {
             return OMAStatus.AliasDoesNotExist;
         }
@@ -204,8 +171,8 @@ class OMAService {
         }
     }
 
-    public List<Match>? GetMatches(string name) {
-        var alias = GetAliasAsDto(name);
+    public List<Match>? GetMatches(string aliasHash) {
+        var alias = GetAliasAsDto(aliasHash);
         if (alias == null) {
             return null;
         }
@@ -221,9 +188,5 @@ class OMAService {
         } catch {
             return [];
         }
-    }
-
-    public string HashString(string alias) {
-        return _context.HashString(alias);
     }
 }

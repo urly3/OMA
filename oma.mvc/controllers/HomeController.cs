@@ -4,6 +4,7 @@ using OMA.Models;
 using OMA.Models.Dto;
 using OMA.Services;
 using OMA.Data;
+using OMA.Core;
 using Internal = OMA.Models.Internal;
 
 namespace OMA.Controllers;
@@ -47,30 +48,43 @@ public class HomeController : Controller {
     [HttpGet("addlobby")]
     [HttpPost("addlobby")]
     public IActionResult AddLobby() {
-
         if (Request.Method == "GET") {
             return View("AddLobby");
         } else {
             var aliasHash = Request.Cookies["aliasHash"];
-            var lobbyId = Request.Form["lobbyId"];
+            var lobby = Request.Form["lobby"];
 
             if (string.IsNullOrWhiteSpace(aliasHash)
-                || string.IsNullOrWhiteSpace(lobbyId)) {
-                return BadRequest("invalid request: no alias set or no lobby provided");
+                || string.IsNullOrWhiteSpace(lobby)) {
+                return BadRequest("no alias set or no lobby provided");
+            }
+
+            long lobbyId;
+            if (!long.TryParse(lobby, out lobbyId)) {
+                return BadRequest("lobbyId not a valid number.");
             }
 
             var bestOfStr = Request.Form["bestOf"];
+            int bestOf = 0;
             var warmupsStr = Request.Form["warmups"];
+            int warmups = 0;
 
-            if (!int.TryParse(bestOfStr, out int bestOf)
-                || !int.TryParse(warmupsStr, out int warmups)) {
-                return BadRequest("invalid request: bestof or warmups not valid");
+            if ((!string.IsNullOrWhiteSpace(bestOfStr)
+                && !int.TryParse(bestOfStr, out bestOf))
+                || (!string.IsNullOrWhiteSpace(warmupsStr)
+                && !int.TryParse(bestOfStr, out warmups))) {
+
+                return BadRequest("invalid values for bestof and/or warmup");
             }
+
+            var lobbyName = Request.Form["lobbyName"];
 
             // i have an aliashash in the cookies
             // i have a valid best of & warmup (0 as default or user provided)
             // can now ask service to add the lobby to the alias
             // the service will return the relevant status should there be any issues.
+
+            _omaService.AddLobbyToAlias(aliasHash, lobbyId, bestOf, warmups, lobbyName, createIfNull: true);
 
             return Redirect("/");
         }
@@ -95,16 +109,11 @@ public class HomeController : Controller {
             return Redirect("/");
         }
 
-        string aliasHash = _omaService.HashString(alias);
+        string aliasHash = OMAUtil.HashString(alias);
 
         Response.Cookies.Append("aliasHash", aliasHash);
 
         return Redirect("/");
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error() {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
     private AliasDto? CheckAndGetAliasDtoFromCookie() {
@@ -113,8 +122,13 @@ public class HomeController : Controller {
             return null;
         }
 
-        var aliasDto = _omaService.GetAliasAsDtoFromHash(aliasHash);
+        var aliasDto = _omaService.GetAliasAsDto(aliasHash);
 
         return aliasDto;
+    }
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error() {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
