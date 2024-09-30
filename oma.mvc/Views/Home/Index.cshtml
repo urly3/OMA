@@ -1,17 +1,23 @@
-﻿@model List<OMA.Models.Dto.LobbyDto>
+﻿@using OMA.Models.Dto
+@model OMA.Models.Dto.AliasDto
+
+@{
+    List<LobbyDto> lobbies = [];
+
+    if (Model != null) {
+        lobbies = Model.Lobbies;
+    }
+}
 
 @{
     ViewData["Title"] = "lobbies";
 }
 
 <div class="text-center">
-    @if (Model != null)
+    @foreach (var lobby in lobbies)
     {
-        foreach (var lobby in Model)
-        {
-            <a href="/viewlobby?lobby=@lobby.LobbyId">
-                <h3> @lobby.LobbyName </h3>
-            </a>
-        }
+        <a href="/viewlobby?lobby=@lobby.LobbyId">
+            <h3> @lobby.LobbyName </h3>
+        </a>
     }
 </div>

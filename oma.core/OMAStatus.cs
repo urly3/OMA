@@ -10,6 +10,7 @@ enum OMAStatus {
     AliasIsUnlocked,
     AliasContainsLobby,
     AliasDoesNotContainLobby,
+    AliasCouldNotBeCreated,
     InvalidPassword,
     PasswordSet,
     PasswordCouldNotBeSet,

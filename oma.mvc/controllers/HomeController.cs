@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using OMA.Models;
 using OMA.Models.Dto;
@@ -21,15 +20,9 @@ public class HomeController : Controller {
     }
 
     public IActionResult Index() {
-        List<LobbyDto> lobbies = [];
-
         var aliasDto = CheckAndGetAliasDtoFromCookie();
 
-        if (aliasDto != null) {
-            lobbies = aliasDto.Lobbies;
-        }
-
-        return View(lobbies);
+        return View(aliasDto);
     }
 
     [HttpGet("viewlobby")]
@@ -37,7 +30,7 @@ public class HomeController : Controller {
         Internal::Match? match = null;
 
         string? lobby = Request.Query["lobby"];
-        if (string.IsNullOrEmpty(lobby)) {
+        if (string.IsNullOrWhiteSpace(lobby)) {
             return BadRequest("lobby not provided.");
         }
 
@@ -51,42 +44,54 @@ public class HomeController : Controller {
         return View(match);
     }
 
-    [HttpGet("viewaliaslobby")]
-    public IActionResult ViewAliasLobby() {
-        Internal::Match? match = null;
+    [HttpGet("addlobby")]
+    [HttpPost("addlobby")]
+    public IActionResult AddLobby() {
 
-        string? lobby = Request.Query["lobby"];
-        if (string.IsNullOrEmpty(lobby)) {
-            return BadRequest("lobby not provided.");
-        }
+        if (Request.Method == "GET") {
+            return View("AddLobby");
+        } else {
+            var aliasHash = Request.Cookies["aliasHash"];
+            var lobbyId = Request.Form["lobbyId"];
 
-        long lobbyId;
-        if (!long.TryParse(lobby, out lobbyId)) {
-            return BadRequest("lobbyId not a valid number.");
-        }
+            if (string.IsNullOrWhiteSpace(aliasHash)
+                || string.IsNullOrWhiteSpace(lobbyId)) {
+                return BadRequest("invalid request: no alias set or no lobby provided");
+            }
 
-        var aliasDto = CheckAndGetAliasDtoFromCookie();
-        if (aliasDto == null) {
-            return BadRequest("alias does not exist.");
-        }
+            var bestOfStr = Request.Form["bestOf"];
+            var warmupsStr = Request.Form["warmups"];
 
-        var lobbyDto = aliasDto.Lobbies.FirstOrDefault(l => l.Id == lobbyId);
-        if (lobbyDto != null) {
-            match = _omaService.GetMatch(lobbyDto.LobbyId, lobbyDto.BestOf, lobbyDto.Warmups);
-        }
+            if (!int.TryParse(bestOfStr, out int bestOf)
+                || !int.TryParse(warmupsStr, out int warmups)) {
+                return BadRequest("invalid request: bestof or warmups not valid");
+            }
 
-        if (match == null) {
-            return BadRequest("lobby does not exist.");
+            // i have an aliashash in the cookies
+            // i have a valid best of & warmup (0 as default or user provided)
+            // can now ask service to add the lobby to the alias
+            // the service will return the relevant status should there be any issues.
+
+            return Redirect("/");
         }
-        
-        return View("ViewLobby", match);
+    }
+
+    [HttpGet("removelobby")]
+    [HttpPost("removelobby")]
+    public IActionResult RemoveLobby() {
+
+        if (Request.Method == "GET") {
+            return View("RemoveLobby");
+        } else {
+            return Redirect("/");
+        }
     }
 
     [HttpPost("setalias")]
     public IActionResult SetAlias() {
         string? alias = Request.Form["alias"];
 
-        if (string.IsNullOrEmpty(alias)) {
+        if (string.IsNullOrWhiteSpace(alias)) {
             return Redirect("/");
         }
 
@@ -104,14 +109,11 @@ public class HomeController : Controller {
 
     private AliasDto? CheckAndGetAliasDtoFromCookie() {
         var aliasHash = Request.Cookies["aliasHash"];
-        if (string.IsNullOrEmpty(aliasHash)) {
+        if (string.IsNullOrWhiteSpace(aliasHash)) {
             return null;
         }
 
         var aliasDto = _omaService.GetAliasAsDtoFromHash(aliasHash);
-        // if (aliasDto == null) {
-        //     Response.Cookies.Delete("aliasHash");
-        // }
 
         return aliasDto;
     }

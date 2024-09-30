@@ -1,5 +1,5 @@
 ﻿@{
-    var alias = @Model as OMA.Models.Alias;
+    var alias = @Model as OMA.Models.Dto.AliasDto;
 }
 
 <!DOCTYPE html>
@@ -28,7 +28,7 @@
                         </li>
                         @if (alias != null)
                         {
-                            if (alias.Password == null)
+                            if (!alias.Locked)
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AddLobby">add</a>
@@ -36,16 +36,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="RemoveLobby">remove</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AliasSwapLock">lock</a>
-                                </li>
                             }
-                            // else
-                            // {
-                            //     <li class="nav-item">
-                            //         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AliasSwapLock">unlock</a>
-                            //     </li>
-                            // }
                         }
                     </ul>
                 </div>

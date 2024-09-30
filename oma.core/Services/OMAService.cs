@@ -138,6 +138,44 @@ class OMAService {
         return _context.AddLobbyToAlias(alias, lobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
     }
 
+    public OMAStatus AddLobbyToAliasOrCreateFromHash(string aliasHash, long lobbyId, int bestOf, int warmups) {
+        Alias? alias = _context.GetAliasFromHash(aliasHash);
+        if (alias == null) {
+            if (!_context.CreateAliasFromHash(aliasHash)) {
+                return OMAStatus.AliasCouldNotBeCreated;
+            } else {
+                alias = _context.GetAliasFromHash(aliasHash)!;
+            }
+        }
+
+        if (alias.Password != null) {
+            return OMAStatus.AliasIsLocked;
+        }
+
+        var existingLobby = _context.GetLobbyEqual(lobbyId, bestOf, warmups);
+
+        if (existingLobby != null) {
+            if (alias.Lobbies.Contains(existingLobby)) {
+                return OMAStatus.AliasContainsLobby;
+            }
+            return _context.AddLobbyToAlias(alias, existingLobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
+        }
+
+        // we don't have that exact lobby (lobbyid, bestof, warmup) stored in the database, start to make a new one.
+
+        if (!OMAImportService.DoesLobbyExist(lobbyId)) {
+            return OMAStatus.LobbyDoesNotExist;
+        }
+
+        Lobby lobby = new() {
+            LobbyId = lobbyId,
+            BestOf = bestOf,
+            Warmups = warmups,
+        };
+
+        return _context.AddLobbyToAlias(alias, lobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
+    }
+
     public OMAStatus RemoveLobbyFromAlias(string name, long lobbyId) {
         Alias? alias = GetAlias(name);
         if (alias == null) {
@@ -161,8 +199,7 @@ class OMAService {
         try {
             var match = OMAImportService.GetMatch(lobby, bestOf, warmups);
             return match;
-        }
-        catch {
+        } catch {
             return null;
         }
     }
@@ -181,8 +218,7 @@ class OMAService {
             }
 
             return matches;
-        }
-        catch {
+        } catch {
             return [];
         }
     }

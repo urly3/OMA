@@ -50,6 +50,14 @@ public class OMAContext : DbContext {
         return SaveChanges() != 0;
     }
 
+    internal bool CreateAliasFromHash(string aliasHash) {
+        Aliases.Add(new() {
+            Hash = aliasHash,
+        });
+
+        return SaveChanges() != 0;
+    }
+
     internal bool AddLobbyToAlias(Alias alias, Lobby lobby) {
         alias.Lobbies.Add(lobby);
         Aliases.Update(alias);
