@@ -32,6 +32,8 @@ public class ApiController : Controller {
             return BadRequest("parameter 'alias' not provided.");
         }
 
+        alias = OMAUtil.HashString(alias);
+
         var dto = _omaService.GetAliasAsDto(alias);
 
         return dto != null ? Ok(dto) : Ok("alias does not exist.");
@@ -44,6 +46,8 @@ public class ApiController : Controller {
         if (string.IsNullOrEmpty(alias)) {
             return BadRequest("parameter 'alias' not provided.");
         }
+
+        alias = OMAUtil.HashString(alias);
 
         if (_omaService.AliasExists(alias)) {
             return Ok("alias already exists.");
@@ -64,10 +68,14 @@ public class ApiController : Controller {
             return BadRequest("parameter 'alias' not provided.");
         }
 
+        alias = OMAUtil.HashString(alias);
+
         string? password = Request.Query["password"];
         if (string.IsNullOrEmpty(password)) {
             return BadRequest("parameter 'password' not provided.");
         }
+
+        password = OMAUtil.HashString(password);
 
         switch (_omaService.SetAliasPassword(alias, password)) {
             case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
@@ -86,10 +94,14 @@ public class ApiController : Controller {
             return BadRequest("parameter 'alias' not provided.");
         }
 
+        alias = OMAUtil.HashString(alias);
+
         string? password = Request.Query["password"];
         if (string.IsNullOrEmpty(password)) {
             return BadRequest("parameter 'password' not provided.");
         }
+
+        password = OMAUtil.HashString(password);
 
         switch (_omaService.UnsetAliasPassword(alias)) {
             case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
@@ -107,6 +119,8 @@ public class ApiController : Controller {
         if (string.IsNullOrEmpty(alias)) {
             return BadRequest("parameter 'alias' not provided.");
         }
+
+        alias = OMAUtil.HashString(alias);
 
         string? lobby = Request.Query["lobby"];
         if (string.IsNullOrEmpty(lobby)) {
@@ -152,6 +166,8 @@ public class ApiController : Controller {
         if (string.IsNullOrEmpty(alias)) {
             return BadRequest("parameter 'alias' not provided.");
         }
+
+        alias = OMAUtil.HashString(alias);
 
         string? lobby = Request.Query["lobby"];
         if (string.IsNullOrEmpty(lobby)) {
@@ -226,6 +242,8 @@ public class ApiController : Controller {
         if (string.IsNullOrEmpty(alias)) {
             return Ok("alias not provided.");
         }
+
+        alias = OMAUtil.HashString(alias);
 
         var matches = _omaService.GetMatches(alias);
         if (matches == null) {
