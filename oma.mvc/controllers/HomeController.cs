@@ -49,43 +49,48 @@ public class HomeController : Controller {
     [HttpPost("addlobby")]
     public IActionResult AddLobby() {
         if (Request.Method == "GET") {
-            return View("AddLobby");
-        } else {
-            var aliasHash = Request.Cookies["aliasHash"];
-            var lobby = Request.Form["lobby"];
+            var aliasDto = CheckAndGetAliasDtoFromCookie();
+            return View("AddLobby", aliasDto);
+        }
 
-            if (string.IsNullOrWhiteSpace(aliasHash)
-                || string.IsNullOrWhiteSpace(lobby)) {
-                return BadRequest("no alias set or no lobby provided");
-            }
+        var aliasHash = Request.Cookies["aliasHash"];
+        var lobby = Request.Form["lobby"];
 
-            long lobbyId;
-            if (!long.TryParse(lobby, out lobbyId)) {
-                return BadRequest("lobbyId not a valid number.");
-            }
+        if (string.IsNullOrWhiteSpace(aliasHash)
+            || string.IsNullOrWhiteSpace(lobby)) {
+            return BadRequest("no alias set or no lobby provided");
+        }
 
-            var bestOfStr = Request.Form["bestOf"];
-            int bestOf = 0;
-            var warmupsStr = Request.Form["warmups"];
-            int warmups = 0;
+        long lobbyId;
+        if (!long.TryParse(lobby, out lobbyId)) {
+            return BadRequest("lobbyId not a valid number.");
+        }
 
-            if ((!string.IsNullOrWhiteSpace(bestOfStr)
-                && !int.TryParse(bestOfStr, out bestOf))
-                || (!string.IsNullOrWhiteSpace(warmupsStr)
-                && !int.TryParse(bestOfStr, out warmups))) {
+        var bestOfStr = Request.Form["bestOf"];
+        int bestOf = 0;
+        var warmupsStr = Request.Form["warmups"];
+        int warmups = 0;
 
-                return BadRequest("invalid values for bestof and/or warmup");
-            }
+        if ((!string.IsNullOrWhiteSpace(bestOfStr)
+            && !int.TryParse(bestOfStr, out bestOf))
+            || (!string.IsNullOrWhiteSpace(warmupsStr)
+            && !int.TryParse(bestOfStr, out warmups))) {
 
-            var lobbyName = Request.Form["lobbyName"];
+            return BadRequest("invalid values for bestof and/or warmup");
+        }
 
-            // i have an aliashash in the cookies
-            // i have a valid best of & warmup (0 as default or user provided)
-            // can now ask service to add the lobby to the alias
-            // the service will return the relevant status should there be any issues.
+        var lobbyName = Request.Form["lobbyName"];
 
-            _omaService.AddLobbyToAlias(aliasHash, lobbyId, bestOf, warmups, lobbyName, createIfNull: true);
+        // i have an aliashash in the cookies
+        // i have a valid best of & warmup (0 as default or user provided)
+        // can now ask service to add the lobby to the alias
+        // the service will return the relevant status should there be any issues.
 
+        // TODO: flesh this out for all the statuses
+        if (_omaService.AddLobbyToAlias(aliasHash, lobbyId, bestOf, warmups, lobbyName, createIfNull: true) != OMAStatus.LobbyAdded) {
+            throw new Exception("could not add lobby");
+        }
+        else {
             return Redirect("/");
         }
     }
@@ -95,10 +100,29 @@ public class HomeController : Controller {
     public IActionResult RemoveLobby() {
 
         if (Request.Method == "GET") {
-            return View("RemoveLobby");
-        } else {
-            return Redirect("/");
+            var aliasDto = CheckAndGetAliasDtoFromCookie();
+            if (aliasDto == null) {
+                return BadRequest("invalid alias");
+            }
+
+            return View("RemoveLobby", aliasDto);
         }
+
+        var aliasHash = Request.Cookies["aliasHash"];
+        if (string.IsNullOrWhiteSpace(aliasHash)) {
+            return BadRequest("alias not set");
+        }
+
+        long? lobbyId = GetLobbyFromForm();
+        if (lobbyId == null) {
+            return BadRequest("invalid lobby");
+        }
+
+        if (_omaService.RemoveLobbyFromAlias(aliasHash, lobbyId.Value) != OMAStatus.LobbyRemoved) {
+            throw new Exception("could not remove lobby");
+        }
+
+        return Redirect("/");
     }
 
     [HttpPost("setalias")]
@@ -125,6 +149,17 @@ public class HomeController : Controller {
         var aliasDto = _omaService.GetAliasAsDto(aliasHash);
 
         return aliasDto;
+    }
+
+    private long? GetLobbyFromForm() {
+        var lobby = Request.Form["lobby"];
+        long lobbyId;
+
+        if (!long.TryParse(lobby, out lobbyId)) {
+            return null;
+        }
+
+        return lobbyId;
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

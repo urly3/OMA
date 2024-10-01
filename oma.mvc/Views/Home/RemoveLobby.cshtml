@@ -1,5 +1,14 @@
-﻿@{
+﻿@using OMA.Models.Dto;
+@model OMA.Models.Dto.AliasDto
+
+@{
+
     ViewData["Title"] = "remove lobby";
+    List<LobbyDto> lobbies = [];
+
+    if (Model != null) {
+        lobbies = Model.Lobbies;
+    }
 }
 
 <div class="">
@@ -8,12 +17,15 @@
 
     <div class="row">
         <div class="col-md-4">
-            <form asp-action="RemoveLobby" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label class="control-label"> id </label>
-                    <input name="lobbyId" class="form-control" type="number" />
-                </div>
-            </form>
+            @foreach (var lobby in lobbies) {
+                <form asp-action="RemoveLobby" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input name="lobby" value="@lobby.LobbyId"/ type="hidden">
+                        <input class="btn btn-primary" type="submit" value="@lobby.LobbyName" />
+                    </div>
+                    <hr>
+                </form>
+            }
         </div>
     </div>
 </div>

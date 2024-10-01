@@ -14,8 +14,7 @@
 }
 
 <div class="text-center">
-    @foreach (var lobby in lobbies)
-    {
+    @foreach (var lobby in lobbies) {
         <a href="/viewlobby?lobby=@lobby.LobbyId">
             <h3> @lobby.LobbyName </h3>
         </a>
