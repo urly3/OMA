@@ -26,13 +26,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">home</a>
                         </li>
-                        @if (alias != null)
+                        @if (alias == null || !alias.Locked)
                         {
-                            if (!alias.Locked)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AddLobby">add</a>
-                                </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AddLobby">add</a>
+                            </li>
+
+                            @if (alias != null) {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="RemoveLobby">remove</a>
                                 </li>
