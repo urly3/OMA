@@ -1,6 +1,7 @@
 namespace OMA.Models.Imported;
 
-public record Lobby {
+public record Lobby
+{
     public Match? match { get; set; }
     public List<Event>? events { get; set; }
     public List<User>? users { get; set; }

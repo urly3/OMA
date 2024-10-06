@@ -1,6 +1,7 @@
 namespace OMA.Core;
 
-enum OMAStatus {
+enum OMAStatus
+{
     ActionFailed,
 
     AliasCrated,

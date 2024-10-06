@@ -1,6 +1,7 @@
 namespace OMA.Models.Imported;
 
-public record Beatmapset {
+public record Beatmapset
+{
     public string? artist { get; set; }
     public string? artist_unicode { get; set; }
     public Covers? covers { get; set; }

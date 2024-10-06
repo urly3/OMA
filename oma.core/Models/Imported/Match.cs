@@ -1,6 +1,7 @@
 namespace OMA.Models.Imported;
 
-public record Match {
+public record Match
+{
     public long id { get; set; }
     public DateTime start_time { get; set; }
     public DateTime end_time { get; set; }

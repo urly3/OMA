@@ -2,11 +2,14 @@
 
 #nullable disable
 
-namespace OMA.Migrations {
+namespace OMA.Migrations
+{
     /// <inheritdoc />
-    public partial class LobbyName : Migration {
+    public partial class LobbyName : Migration
+    {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder) {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.AddColumn<string>(
                 name: "LobbyName",
                 table: "Lobbies",
@@ -16,7 +19,8 @@ namespace OMA.Migrations {
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder) {
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.DropColumn(
                 name: "LobbyName",
                 table: "Lobbies");

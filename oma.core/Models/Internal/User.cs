@@ -1,6 +1,7 @@
 namespace OMA.Models.Internal;
 
-class User {
+class User
+{
     public long UserId { get; set; }
     public string Username { get; set; } = default!;
     public string AvatarUrl { get; set; } = default!;

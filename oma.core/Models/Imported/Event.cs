@@ -1,6 +1,7 @@
 namespace OMA.Models.Imported;
 
-public record Event {
+public record Event
+{
     public long? id { get; set; }
     public Detail? detail { get; set; }
     public DateTime timestamp { get; set; }

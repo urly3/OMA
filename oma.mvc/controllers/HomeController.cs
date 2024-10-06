@@ -9,34 +9,40 @@ using Internal = OMA.Models.Internal;
 
 namespace OMA.Controllers;
 
-public class HomeController : Controller {
+public class HomeController : Controller
+{
     private readonly ILogger<HomeController> _logger;
     private OMAContext _context;
     private OMAService _omaService;
 
-    public HomeController(ILogger<HomeController> logger, OMAContext context) {
+    public HomeController(ILogger<HomeController> logger, OMAContext context)
+    {
         _logger = logger;
         _context = context;
         _omaService = new(_context);
     }
 
-    public IActionResult Index() {
+    public IActionResult Index()
+    {
         var aliasDto = CheckAndGetAliasDtoFromCookie();
 
         return View(aliasDto);
     }
 
     [HttpGet("viewlobby")]
-    public IActionResult ViewLobby() {
+    public IActionResult ViewLobby()
+    {
         Internal::Match? match = null;
 
         string? lobby = Request.Query["lobby"];
-        if (string.IsNullOrWhiteSpace(lobby)) {
+        if (string.IsNullOrWhiteSpace(lobby))
+        {
             return BadRequest("lobby not provided.");
         }
 
         long lobbyId;
-        if (!long.TryParse(lobby, out lobbyId)) {
+        if (!long.TryParse(lobby, out lobbyId))
+        {
             return BadRequest("lobbyId not a valid number.");
         }
 
@@ -47,8 +53,10 @@ public class HomeController : Controller {
 
     [HttpGet("addlobby")]
     [HttpPost("addlobby")]
-    public IActionResult AddLobby() {
-        if (Request.Method == "GET") {
+    public IActionResult AddLobby()
+    {
+        if (Request.Method == "GET")
+        {
             var aliasDto = CheckAndGetAliasDtoFromCookie();
             return View("AddLobby", aliasDto);
         }
@@ -57,12 +65,14 @@ public class HomeController : Controller {
         var lobby = Request.Form["lobby"];
 
         if (string.IsNullOrWhiteSpace(aliasHash)
-            || string.IsNullOrWhiteSpace(lobby)) {
+            || string.IsNullOrWhiteSpace(lobby))
+        {
             return BadRequest("no alias set or no lobby provided");
         }
 
         long lobbyId;
-        if (!long.TryParse(lobby, out lobbyId)) {
+        if (!long.TryParse(lobby, out lobbyId))
+        {
             return BadRequest("lobbyId not a valid number.");
         }
 
@@ -74,7 +84,8 @@ public class HomeController : Controller {
         if ((!string.IsNullOrWhiteSpace(bestOfStr)
             && !int.TryParse(bestOfStr, out bestOf))
             || (!string.IsNullOrWhiteSpace(warmupsStr)
-            && !int.TryParse(bestOfStr, out warmups))) {
+            && !int.TryParse(bestOfStr, out warmups)))
+        {
 
             return BadRequest("invalid values for bestof and/or warmup");
         }
@@ -87,21 +98,26 @@ public class HomeController : Controller {
         // the service will return the relevant status should there be any issues.
 
         // TODO: flesh this out for all the statuses
-        if (_omaService.AddLobbyToAlias(aliasHash, lobbyId, bestOf, warmups, lobbyName, createIfNull: true) != OMAStatus.LobbyAdded) {
+        if (_omaService.AddLobbyToAlias(aliasHash, lobbyId, bestOf, warmups, lobbyName, createIfNull: true) != OMAStatus.LobbyAdded)
+        {
             throw new Exception("could not add lobby");
         }
-        else {
+        else
+        {
             return Redirect("/");
         }
     }
 
     [HttpGet("removelobby")]
     [HttpPost("removelobby")]
-    public IActionResult RemoveLobby() {
+    public IActionResult RemoveLobby()
+    {
 
-        if (Request.Method == "GET") {
+        if (Request.Method == "GET")
+        {
             var aliasDto = CheckAndGetAliasDtoFromCookie();
-            if (aliasDto == null) {
+            if (aliasDto == null)
+            {
                 return BadRequest("invalid alias");
             }
 
@@ -109,16 +125,19 @@ public class HomeController : Controller {
         }
 
         var aliasHash = Request.Cookies["aliasHash"];
-        if (string.IsNullOrWhiteSpace(aliasHash)) {
+        if (string.IsNullOrWhiteSpace(aliasHash))
+        {
             return BadRequest("alias not set");
         }
 
         long? lobbyId = GetLobbyFromForm();
-        if (lobbyId == null) {
+        if (lobbyId == null)
+        {
             return BadRequest("invalid lobby");
         }
 
-        if (_omaService.RemoveLobbyFromAlias(aliasHash, lobbyId.Value) != OMAStatus.LobbyRemoved) {
+        if (_omaService.RemoveLobbyFromAlias(aliasHash, lobbyId.Value) != OMAStatus.LobbyRemoved)
+        {
             throw new Exception("could not remove lobby");
         }
 
@@ -126,10 +145,12 @@ public class HomeController : Controller {
     }
 
     [HttpPost("setalias")]
-    public IActionResult SetAlias() {
+    public IActionResult SetAlias()
+    {
         string? alias = Request.Form["alias"];
 
-        if (string.IsNullOrWhiteSpace(alias)) {
+        if (string.IsNullOrWhiteSpace(alias))
+        {
             return Redirect("/");
         }
 
@@ -140,9 +161,11 @@ public class HomeController : Controller {
         return Redirect("/");
     }
 
-    private AliasDto? CheckAndGetAliasDtoFromCookie() {
+    private AliasDto? CheckAndGetAliasDtoFromCookie()
+    {
         var aliasHash = Request.Cookies["aliasHash"];
-        if (string.IsNullOrWhiteSpace(aliasHash)) {
+        if (string.IsNullOrWhiteSpace(aliasHash))
+        {
             return null;
         }
 
@@ -151,11 +174,13 @@ public class HomeController : Controller {
         return aliasDto;
     }
 
-    private long? GetLobbyFromForm() {
+    private long? GetLobbyFromForm()
+    {
         var lobby = Request.Form["lobby"];
         long lobbyId;
 
-        if (!long.TryParse(lobby, out lobbyId)) {
+        if (!long.TryParse(lobby, out lobbyId))
+        {
             return null;
         }
 
@@ -163,7 +188,8 @@ public class HomeController : Controller {
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error() {
+    public IActionResult Error()
+    {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
