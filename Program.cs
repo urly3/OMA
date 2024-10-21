@@ -3,7 +3,7 @@ using OMA.Data;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
 {
-    WebRootPath = Directory.GetCurrentDirectory() + "/oma.mvc/wwwroot",
+    WebRootPath = Directory.GetCurrentDirectory() + "/Mvc/wwwroot",
 });
 
 // Add services to the container.
@@ -12,8 +12,8 @@ builder.Services.AddScoped<OMAContext>();
 builder.Services.Configure<RazorViewEngineOptions>(o =>
 {
     o.ViewLocationFormats.Clear();
-    o.ViewLocationFormats.Add("/oma.mvc/Views/{1}/{0}" + RazorViewEngine.ViewExtension);
-    o.ViewLocationFormats.Add("/oma.mvc/views/Shared/{0}" + RazorViewEngine.ViewExtension);
+    o.ViewLocationFormats.Add("/Mvc/Views/{1}/{0}" + RazorViewEngine.ViewExtension);
+    o.ViewLocationFormats.Add("/Mvc/views/Shared/{0}" + RazorViewEngine.ViewExtension);
 });
 var app = builder.Build();
 

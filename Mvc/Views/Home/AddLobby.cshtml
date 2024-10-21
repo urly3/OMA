@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "add lobby";
+}
+
+<div class="">
+    <h1>@ViewData["Title"]</h1>
+    <p>add a lobby under the current alias.</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="AddLobby" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="control-label"> id </label>
+                    <input name="lobby" class="form-control" type="number" placeholder="11223344" min="0" required />
+                    <label class="control-label">best of (opt.)</label>
+                    <input name="bestOf" class="form-control" type="number" placeholder="0" min="0" />
+                    <label class="control-label">warmups (opt.)</label>
+                    <input name="warmups" class="form-control" type="number" placeholder="0" min="0" />
+                    <label class="control-label">lobby name (opt.)</label>
+                    <input name="lobbyName" class="form-control" type="text" placeholder="defaults to match title" min="0" />
+                    <hr>
+                    <input class="btn btn-primary" type="submit" value="add" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
