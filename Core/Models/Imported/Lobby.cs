@@ -1,4 +1,4 @@
-namespace OMA.Models.Imported;
+namespace OMA.Core.Models.Imported;
 
 public record Lobby
 {

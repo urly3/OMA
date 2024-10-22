@@ -1,20 +1,13 @@
-using Microsoft.AspNetCore.Mvc.Razor;
-using OMA.Data;
+using OMA.Core.Data;
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
+var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions()
 {
-    WebRootPath = Directory.GetCurrentDirectory() + "/Mvc/wwwroot",
+    WebRootPath = Directory.GetCurrentDirectory() + "/Mvc/www",
 });
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 builder.Services.AddScoped<OMAContext>();
-builder.Services.Configure<RazorViewEngineOptions>(o =>
-{
-    o.ViewLocationFormats.Clear();
-    o.ViewLocationFormats.Add("/Mvc/Views/{1}/{0}" + RazorViewEngine.ViewExtension);
-    o.ViewLocationFormats.Add("/Mvc/views/Shared/{0}" + RazorViewEngine.ViewExtension);
-});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,10 +20,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseRouting();
-app.UseAuthorization();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
 app.Run();

@@ -22,7 +22,7 @@ enum OMAStatus
     LobbyCouldNotBeAdded,
     LobbyRemoved,
     LobbyCouldNotBeRemoved,
-    LobbyDoesNotExist,
+    LobbyNotValid,
 
     MatchBadResponse,
     MatchUrlInvalid,

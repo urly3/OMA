@@ -1,6 +1,6 @@
-namespace OMA.Models.Internal;
+namespace OMA.Core.Models.Internal;
 
-class Map
+public class Map
 {
     public long BeatmapId { get; set; }
     public long BeatmapSetId { get; set; }

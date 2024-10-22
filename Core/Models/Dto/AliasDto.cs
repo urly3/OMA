@@ -1,4 +1,4 @@
-namespace OMA.Models.Dto;
+namespace OMA.Core.Models.Dto;
 
 public class AliasDto
 {

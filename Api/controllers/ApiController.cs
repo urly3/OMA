@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using OMA.Services;
 using OMA.Core;
-using OMA.Data;
-using OMA.Models.Dto;
+using OMA.Core.Data;
+using OMA.Core.Models.Dto;
+using OMA.Core.Services;
 
-namespace OMA.Controllers;
+namespace OMA.Api.Controllers;
 
 [Route("/api")]
 public class ApiController : Controller
@@ -130,107 +130,6 @@ public class ApiController : Controller
         }
     }
 
-    // change to post(?) when more concrete.
-    [HttpGet("add_lobby")]
-    public ActionResult AddLobby()
-    {
-        string? alias = Request.Query["alias"];
-        if (string.IsNullOrEmpty(alias))
-        {
-            return BadRequest("parameter 'alias' not provided.");
-        }
-
-        alias = OMAUtil.HashString(alias);
-
-        string? lobby = Request.Query["lobby"];
-        if (string.IsNullOrEmpty(lobby))
-        {
-            return BadRequest("parameter 'lobby' not provided.");
-        }
-
-        int bestOf = 0;
-        int warmups = 0;
-
-        string? bestOfStr = Request.Query["bestof"];
-        if (!string.IsNullOrEmpty(bestOfStr))
-        {
-            int.TryParse(bestOfStr, out bestOf);
-        }
-
-        string? warmupsStr = Request.Query["warmups"];
-        if (!string.IsNullOrEmpty(warmupsStr))
-        {
-            int.TryParse(warmupsStr, out warmups);
-        }
-
-        long lobbyId;
-
-        if (!long.TryParse(lobby, out lobbyId))
-        {
-            return Ok("lobby value not a valid number.");
-        }
-
-        var lobbyName = Request.Query["lobbyName"];
-
-        switch (_omaService.AddLobbyToAlias(alias, lobbyId, bestOf, warmups, lobbyName))
-        {
-            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
-            case OMAStatus.AliasIsLocked: return BadRequest("alias is locked.");
-            case OMAStatus.AliasContainsLobby: return BadRequest("alias already contained lobby.");
-            case OMAStatus.LobbyDoesNotExist: return BadRequest("lobby does not exist.");
-            case OMAStatus.LobbyCouldNotBeAdded: throw new Exception("lobby could not be added.");
-            case OMAStatus.LobbyAdded: return Ok("lobby added.");
-            default: throw new Exception("unhandled state.");
-        }
-    }
-
-    // change to post(?) when more concrete.
-    [HttpGet("remove_lobby")]
-    public ActionResult RemoveLobby()
-    {
-        string? alias = Request.Query["alias"];
-        if (string.IsNullOrEmpty(alias))
-        {
-            return BadRequest("parameter 'alias' not provided.");
-        }
-
-        alias = OMAUtil.HashString(alias);
-
-        string? lobby = Request.Query["lobby"];
-        if (string.IsNullOrEmpty(lobby))
-        {
-            return BadRequest("parameter 'lobby' not provided.");
-        }
-
-        long lobbyId;
-
-        if (!long.TryParse(lobby, out lobbyId))
-        {
-            return Ok("lobby value not a valid number.");
-        }
-
-        if (!_omaService.AliasExists(alias))
-        {
-            return Ok("alias does not exist");
-        }
-
-        if (_omaService.AliasHasPassword(alias))
-        {
-            return Ok("alias is locked.");
-        }
-
-        switch (_omaService.RemoveLobbyFromAlias(alias, lobbyId))
-        {
-            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
-            case OMAStatus.AliasIsLocked: return BadRequest("alias is locked.");
-            case OMAStatus.AliasDoesNotContainLobby: return BadRequest("alias does not contain lobby.");
-            case OMAStatus.LobbyDoesNotExist: return BadRequest("lobby does not exist.");
-            case OMAStatus.LobbyCouldNotBeRemoved: throw new Exception("lobby could not be removed.");
-            case OMAStatus.LobbyRemoved: return Ok("lobby removed.");
-            default: throw new Exception("unhandled state.");
-        }
-    }
-
     [HttpGet("get_match")]
     public ActionResult GetMatch()
     {
@@ -244,7 +143,7 @@ public class ApiController : Controller
         int bestOf = 0;
         int warmups = 0;
 
-        string? bestOfStr = Request.Query["bestof"];
+        string? bestOfStr = Request.Query["best_of"];
         if (!string.IsNullOrEmpty(bestOfStr))
         {
             int.TryParse(bestOfStr, out bestOf);

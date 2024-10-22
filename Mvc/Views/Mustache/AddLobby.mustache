@@ -1,0 +1,17 @@
+{{> NavBar}}
+
+<form action="" enctype="multipart/form-data" method="post">
+	<label>lobby name</label>
+	<input name="lobby_name" type="text"/>
+
+	<label>lobby   id</label>
+	<input name="lobby" type="text" pattern="[0-9]+"/>
+
+	<label>best    of</label>
+	<input name="best_of" type="number" value="0"/>
+
+	<label>warmups</label>
+	<input name="warmups" type="number" value="0"/>
+
+	<input type="submit"/>
+</form>

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using OMA.Models;
+using OMA.Core.Models;
 
-namespace OMA.Data;
+namespace OMA.Core.Data;
 
 public class OMAContext : DbContext
 {
@@ -122,8 +122,8 @@ public class OMAContext : DbContext
         return true;
     }
 
-    internal Lobby? GetLobbyEqual(long lobbyId, int bestOf, int warmups)
+    internal Lobby? GetLobbyEqual(string lobbyName, long lobbyId, int bestOf, int warmups)
     {
-        return Lobbies.FirstOrDefault(l => l.LobbyId == lobbyId && l.BestOf == bestOf && l.Warmups == warmups);
+        return Lobbies.FirstOrDefault(l => l.LobbyName == lobbyName && l.LobbyId == lobbyId && l.BestOf == bestOf && l.Warmups == warmups);
     }
 }

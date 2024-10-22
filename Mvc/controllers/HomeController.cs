@@ -1,13 +1,14 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using OMA.Models;
-using OMA.Models.Dto;
-using OMA.Services;
-using OMA.Data;
 using OMA.Core;
-using Internal = OMA.Models.Internal;
+using OMA.Core.Data;
+using OMA.Core.Models;
+using OMA.Core.Models.Dto;
+using OMA.Core.Services;
+using Stubble.Core.Builders;
+using System.Diagnostics;
+using System.Text;
 
-namespace OMA.Controllers;
+namespace OMA.Mvc.controllers;
 
 public class HomeController : Controller
 {
@@ -20,33 +21,42 @@ public class HomeController : Controller
         _omaService = new(context);
     }
 
+    [Route("")]
     public IActionResult Index()
     {
         var aliasDto = CheckAndGetAliasDtoFromCookie();
 
-        return View(aliasDto);
+        Response.Headers["content-type"] = "text/hmtl";
+        return Content(RenderStubbleTemplate("Index", aliasDto), "text/html");
     }
 
     [HttpGet("viewlobby")]
     public IActionResult ViewLobby()
     {
-        Internal::Match? match = null;
-
-        string? lobby = Request.Query["lobby"];
-        if (string.IsNullOrWhiteSpace(lobby))
+        var lobbyId = GetLobbyFromQuery();
+        if (lobbyId == null)
         {
-            return BadRequest("lobby not provided.");
+            return BadRequest("invalid lobby");
         }
 
-        long lobbyId;
-        if (!long.TryParse(lobby, out lobbyId))
+        var dto = CheckAndGetAliasDtoFromCookie();
+        var bestOf = GetBestOfFromQuery();
+        var warmups = GetWarmupsFromQuery();
+
+        if (bestOf == null || warmups == null)
         {
-            return BadRequest("lobbyId not a valid number.");
+            return BadRequest("invalid bestof / warmups");
         }
 
-        match = _omaService.GetMatch(lobbyId, 0, 0);
+        var match = _omaService.GetMatch(lobbyId.Value, bestOf.Value, warmups.Value);
 
-        return View(match);
+        if (match == null)
+        {
+            return BadRequest("could not get match from lobby id");
+        }
+        var viewmodel = new ViewLobbyViewModel(dto, match);
+
+        return Content(RenderStubbleTemplate("ViewLobby", viewmodel), "text/html");
     }
 
     [HttpGet("addlobby")]
@@ -56,53 +66,41 @@ public class HomeController : Controller
         if (Request.Method == "GET")
         {
             var aliasDto = CheckAndGetAliasDtoFromCookie();
-            return View("AddLobby", aliasDto);
+            return Content(RenderStubbleTemplate("AddLobby", aliasDto), "text/html");
         }
 
         var aliasHash = Request.Cookies["aliasHash"];
-        var lobby = Request.Form["lobby"];
 
-        if (string.IsNullOrWhiteSpace(aliasHash)
-            || string.IsNullOrWhiteSpace(lobby))
+        if (string.IsNullOrWhiteSpace(aliasHash))
         {
-            return BadRequest("no alias set or no lobby provided");
+            return BadRequest("no alias set");
         }
 
-        long lobbyId;
-        if (!long.TryParse(lobby, out lobbyId))
+        var lobbyId = GetLobbyFromForm();
+        if (lobbyId == null)
         {
             return BadRequest("lobbyId not a valid number.");
         }
 
-        var bestOfStr = Request.Form["bestOf"];
-        int bestOf = 0;
-        var warmupsStr = Request.Form["warmups"];
-        int warmups = 0;
+        var bestOf = GetBestOfFromForm();
+        var warmups = GetWarmupsFromForm();
 
-        if ((!string.IsNullOrWhiteSpace(bestOfStr)
-            && !int.TryParse(bestOfStr, out bestOf))
-            || (!string.IsNullOrWhiteSpace(warmupsStr)
-            && !int.TryParse(bestOfStr, out warmups)))
+        if (bestOf == null || warmups == null)
         {
-
-            return BadRequest("invalid values for bestof and/or warmup");
+            return BadRequest("invalid bestof / warmups");
         }
 
-        var lobbyName = Request.Form["lobbyName"];
+        var lobbyName = Request.Form["lobby_name"];
 
-        // i have an aliashash in the cookies
-        // i have a valid best of & warmup (0 as default or user provided)
-        // can now ask service to add the lobby to the alias
-        // the service will return the relevant status should there be any issues.
-
-        // TODO: flesh this out for all the statuses
-        if (_omaService.AddLobbyToAlias(aliasHash, lobbyId, bestOf, warmups, lobbyName, createIfNull: true) != OMAStatus.LobbyAdded)
+        // TODO: flesh this out for all error statuses
+        switch (_omaService.AddLobbyToAlias(aliasHash, lobbyId.Value, bestOf.Value, warmups.Value, lobbyName, createIfNull: true))
         {
-            throw new Exception("could not add lobby");
-        }
-        else
-        {
-            return Redirect("/");
+            case OMAStatus.LobbyAdded:
+                return Redirect("/");
+            case OMAStatus.AliasContainsLobby:
+                return BadRequest("alias contains existing lobby");
+            default:
+                return Problem("unhandled error status");
         }
     }
 
@@ -119,7 +117,7 @@ public class HomeController : Controller
                 return BadRequest("invalid alias");
             }
 
-            return View("RemoveLobby", aliasDto);
+            return Content(RenderStubbleTemplate("RemoveLobby", aliasDto), "text/html");
         }
 
         var aliasHash = Request.Cookies["aliasHash"];
@@ -134,12 +132,20 @@ public class HomeController : Controller
             return BadRequest("invalid lobby");
         }
 
-        if (_omaService.RemoveLobbyFromAlias(aliasHash, lobbyId.Value) != OMAStatus.LobbyRemoved)
+        string? lobbyName = Request.Form["lobby_name"];
+        if (lobbyName == null)
         {
-            throw new Exception("could not remove lobby");
+            return BadRequest("lobby name not provided");
         }
 
-        return Redirect("/");
+        // TODO: flesh this out for all error statuses
+        switch (_omaService.RemoveLobbyFromAlias(aliasHash, lobbyId.Value, lobbyName))
+        {
+            case OMAStatus.LobbyRemoved:
+                return Redirect("/");
+            default:
+                return Problem("unhandled error status");
+        }
     }
 
     [HttpPost("setalias")]
@@ -159,6 +165,13 @@ public class HomeController : Controller
         return Redirect("/");
     }
 
+    [Route("error")]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
     private AliasDto? CheckAndGetAliasDtoFromCookie()
     {
         var aliasHash = Request.Cookies["aliasHash"];
@@ -174,7 +187,7 @@ public class HomeController : Controller
 
     private long? GetLobbyFromForm()
     {
-        var lobby = Request.Form["lobby"];
+        var lobby = Request.Form["lobby"].FirstOrDefault();
         long lobbyId;
 
         if (!long.TryParse(lobby, out lobbyId))
@@ -185,9 +198,97 @@ public class HomeController : Controller
         return lobbyId;
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    private long? GetLobbyFromQuery()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var lobby = Request.Query["lobby"].FirstOrDefault();
+        long lobbyId;
+
+        if (!long.TryParse(lobby, out lobbyId))
+        {
+            return null;
+        }
+
+        return lobbyId;
+    }
+
+    private int? GetBestOfFromQuery()
+    {
+        var bestOfStr = Request.Query["best_of"].FirstOrDefault();
+        int bestOf;
+
+        if (!int.TryParse(bestOfStr, out bestOf))
+        {
+            return null;
+        }
+
+        return bestOf;
+    }
+
+    private int? GetBestOfFromForm()
+    {
+        var bestOfStr = Request.Form["best_of"].FirstOrDefault();
+        int bestOf;
+
+        if (!int.TryParse(bestOfStr, out bestOf))
+        {
+            return null;
+        }
+
+        return bestOf;
+    }
+
+    private int? GetWarmupsFromQuery()
+    {
+        var warmupsStr = Request.Query["warmups"].FirstOrDefault();
+        int warmups;
+
+        if (!int.TryParse(warmupsStr, out warmups))
+        {
+            return null;
+        }
+
+        return warmups;
+    }
+
+    private int? GetWarmupsFromForm()
+    {
+        var warmupsStr = Request.Form["warmups"].FirstOrDefault();
+        int warmups;
+
+        if (!int.TryParse(warmupsStr, out warmups))
+        {
+            return null;
+        }
+
+        return warmups;
+    }
+
+    private string RenderStubbleTemplate(string template, dynamic? model)
+    {
+        var stubble = new StubbleBuilder().Build();
+
+        // since templates are loaded at runtime on each request, it's hot swappable / reloadable
+        // 
+        // add global partials
+        var filePaths = new string[]
+        {
+            @"NavBar",
+        };
+        var partials = new Dictionary<string, string>();
+
+        foreach (var file in filePaths)
+        {
+            using (var streamReader = new StreamReader(string.Format($@".\Mvc\Views\Mustache\{file}.mustache"), Encoding.UTF8))
+            {
+                partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
+            }
+        }
+
+        // render passed in template
+        using (var streamReader = new StreamReader(string.Format($@".\Mvc\Views\Mustache\{template}.mustache"), Encoding.UTF8))
+        {
+            var output = stubble.Render(streamReader.ReadToEnd(), model, partials, null);
+            return output;
+        }
     }
 }

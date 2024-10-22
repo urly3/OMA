@@ -1,10 +1,9 @@
-using OMA.Core;
-using OMA.Data;
-using OMA.Models;
-using OMA.Models.Dto;
-using OMA.Models.Internal;
+using OMA.Core.Data;
+using OMA.Core.Models;
+using OMA.Core.Models.Dto;
+using OMA.Core.Models.Internal;
 
-namespace OMA.Services;
+namespace OMA.Core.Services;
 
 class OMAService
 {
@@ -110,7 +109,7 @@ class OMAService
         return _context.RemoveAliasPassword(alias) ? OMAStatus.PasswordSet : OMAStatus.PasswordCouldNotBeSet;
     }
 
-    public OMAStatus AddLobbyToAlias(string aliasHash, long lobbyId, int bestOf, int warmups, string? lobbyName, bool createIfNull = false)
+    public OMAStatus AddLobbyToAlias(string aliasHash, long lobbyId, int bestOf, int warmups, string? lobbyName, bool createIfNull)
     {
         Alias? alias = GetAlias(aliasHash);
         if (alias == null)
@@ -134,7 +133,22 @@ class OMAService
             }
         }
 
-        var existingLobby = _context.GetLobbyEqual(lobbyId, bestOf, warmups);
+        if (!OMAImportService.DoesLobbyExist(lobbyId))
+        {
+            return OMAStatus.LobbyNotValid;
+        }
+
+        if (string.IsNullOrWhiteSpace(lobbyName))
+        {
+            var tempMatch = OMAImportService.GetMatch(lobbyId);
+            if (tempMatch == null)
+            {
+                return OMAStatus.LobbyNotValid;
+            }
+            lobbyName = tempMatch.Name;
+        }
+
+        var existingLobby = _context.GetLobbyEqual(lobbyName, lobbyId, bestOf, warmups);
 
         if (existingLobby != null)
         {
@@ -144,18 +158,6 @@ class OMAService
             }
 
             return _context.AddLobbyToAlias(alias, existingLobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
-        }
-
-        // we don't have that exact lobby stored in the database, start to make a new one.
-
-        if (!OMAImportService.DoesLobbyExist(lobbyId))
-        {
-            return OMAStatus.LobbyDoesNotExist;
-        }
-
-        if (string.IsNullOrWhiteSpace(lobbyName))
-        {
-            lobbyName = OMAImportService.GetMatch(lobbyId).Name;
         }
 
         Lobby lobby = new()
@@ -169,7 +171,7 @@ class OMAService
         return _context.AddLobbyToAlias(alias, lobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
     }
 
-    public OMAStatus RemoveLobbyFromAlias(string aliasHash, long lobbyId)
+    public OMAStatus RemoveLobbyFromAlias(string aliasHash, long lobbyId, string lobbyName)
     {
         Alias? alias = GetAlias(aliasHash);
         if (alias == null)
@@ -182,7 +184,7 @@ class OMAService
             return OMAStatus.AliasIsLocked;
         }
 
-        var lobby = alias.Lobbies.FirstOrDefault(x => x.LobbyId == lobbyId);
+        var lobby = alias.Lobbies.FirstOrDefault(l => l.LobbyId == lobbyId && l.LobbyName == lobbyName);
 
         if (lobby == null)
         {
@@ -199,8 +201,9 @@ class OMAService
             var match = OMAImportService.GetMatch(lobby, bestOf, warmups);
             return match;
         }
-        catch
+        catch (Exception e)
         {
+            Console.WriteLine($"exception in get match: {e}");
             return null;
         }
     }
@@ -219,7 +222,7 @@ class OMAService
 
             foreach (var lobby in alias.Lobbies)
             {
-                matches.Add(OMAImportService.GetMatch(lobby.LobbyId, lobby.BestOf, lobby.Warmups));
+                matches.Add(OMAImportService.GetMatch(lobby.LobbyId, lobby.BestOf, lobby.Warmups) ?? new() { });
             }
 
             return matches;

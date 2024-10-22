@@ -1,6 +1,6 @@
-namespace OMA.Models.Internal;
+namespace OMA.Core.Models.Internal;
 
-class User
+public class User
 {
     public long UserId { get; set; }
     public string Username { get; set; } = default!;

@@ -1,4 +1,4 @@
-namespace OMA;
+namespace OMA.Core.Models.Imported;
 
 public class CurrentUserAttributes
 {

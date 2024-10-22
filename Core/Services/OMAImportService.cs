@@ -1,8 +1,8 @@
 using System.Net;
-using Imported = OMA.Models.Imported;
-using Internal = OMA.Models.Internal;
+using Imported = OMA.Core.Models.Imported;
+using Internal = OMA.Core.Models.Internal;
 
-namespace OMA.Services;
+namespace OMA.Core.Services;
 
 public static class OMAImportService
 {
@@ -26,16 +26,19 @@ public static class OMAImportService
         }
     }
 
-    internal static Internal::Match GetMatch(long id, int bestOf = 0, int warmups = 0)
+    internal static Internal::Match? GetMatch(long id, int bestOf = 0, int warmups = 0)
     {
         // TODO:
         // use nullables instead of exceptions, or unions / options.
         // pass in the string and handle both cases with a flag?
         // have the function ready to use urls.
         var lobby = GetLobbyFromId(id);
+        if (lobby == null)
+        {
+            return null;
+        }
         var match = GetMatchFromLobby(lobby, bestOf, warmups);
         return match;
-
     }
 
     private static long LobbyIdFromUrl(string url)
@@ -56,7 +59,7 @@ public static class OMAImportService
         return id;
     }
 
-    private static Imported::Lobby GetLobbyFromId(long id)
+    private static Imported::Lobby? GetLobbyFromId(long id)
     {
         string multi_link = @"https://osu.ppy.sh/community/matches/";
         string base_uri = multi_link + id.ToString();
@@ -69,14 +72,17 @@ public static class OMAImportService
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                throw new Exception("not ok response: lobby likely not found");
+                //throw new Exception("not ok response: lobby likely not found");
+                return null;
             }
 
             string json = response.Content.ReadAsStringAsync().Result;
             var lobby = System.Text.Json.JsonSerializer.Deserialize<Imported::Lobby>(json) ?? throw new Exception("failed to deserialise");
 
-            _ = lobby.events ?? throw new Exception("no events");
-            _ = lobby.users ?? throw new Exception("no users");
+            if (lobby.events == null || lobby.users == null)
+            {
+                return null;
+            }
 
             var lobbyFirstEventIdSaved = lobby.events[0].id ?? throw new NullReferenceException();
             var lobbyFirstEventId = lobby.events[0].id ?? throw new NullReferenceException();
@@ -88,13 +94,17 @@ public static class OMAImportService
                 var newReponse = client.Send(newRequest);
                 if (newReponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new Exception("not ok response: lobby likely not found");
+                    //throw new Exception("not ok response: lobby likely not found");
+                    return null;
                 }
 
                 var newJson = newReponse.Content.ReadAsStringAsync().Result;
                 var newLobby = System.Text.Json.JsonSerializer.Deserialize<Imported::Lobby>(newJson) ?? throw new Exception("failed to deserialise");
-                _ = newLobby.events ?? throw new Exception("no events");
-                _ = newLobby.users ?? throw new Exception("no users");
+                if (newLobby.users == null || newLobby.events == null)
+                {
+                    return null;
+                }
+
                 lobby.events.InsertRange(0, newLobby.events);
 
                 foreach (var user in newLobby.users)
@@ -256,39 +266,62 @@ public static class OMAImportService
                     .Where(u => u.UserId == score.UserId)
                     .First();
 
-                if (setBy.Team == Internal::Team.Blue)
-                {
-                    blueTotalScore += score.TotalScore;
-                    ++blueScoreCount;
-                }
-                else
+                if (setBy.Team == Internal::Team.Red)
                 {
                     redTotalScore += score.TotalScore;
                     ++redScoreCount;
                 }
+                else
+                {
+                    blueTotalScore += score.TotalScore;
+                    ++blueScoreCount;
+                }
             }
 
             map.AverageScore = (redTotalScore + blueTotalScore) / map.Scores.Count;
-            map.BlueAverageScore = blueTotalScore / blueScoreCount;
             map.RedAverageScore = redTotalScore / redScoreCount;
+            map.BlueAverageScore = blueTotalScore / blueScoreCount;
 
             if (skipMap)
             {
+                skipMap = false;
                 continue;
             }
 
-            if (blueTotalScore > redTotalScore)
+            if (redTotalScore > blueTotalScore)
             {
-                ++blueWins;
+                ++redWins;
             }
             else
             {
-                ++redWins;
+                ++blueWins;
             }
         }
 
         match.BlueWins = blueWins;
         match.RedWins = redWins;
+
+        if (match.RedWins > match.BlueWins)
+        {
+            match.WinningTeam = Internal.Team.Red;
+            if (match.BestOf == 0)
+            {
+                match.BestOf = (match.RedWins * 2) - 1;
+            }
+        }
+        else if (match.BlueWins > match.RedWins)
+        {
+            match.WinningTeam = Internal.Team.Blue;
+            if (match.BestOf == 0)
+            {
+                match.BestOf = (match.BlueWins * 2) - 1;
+            }
+        }
+        else
+        {
+            match.WinningTeam = Internal.Team.None;
+            match.BestOf = match.RedWins * 2;
+        }
 
         // remove non-tourney maps.
         foreach (var map in match.AbandonedMaps)
@@ -310,7 +343,7 @@ public static class OMAImportService
 
             if (user.MapsPlayed == 0)
             {
-                return;
+                continue;
             }
 
             float matchAvg = 0.0f;
@@ -345,12 +378,12 @@ public static class OMAImportService
                 matchAvg += score.TotalScore / map.AverageScore;
 
                 teamAvg += user.Team == Internal::Team.Red
-                    ? (score.TotalScore / map.RedAverageScore)
-                    : (score.TotalScore / map.BlueAverageScore);
+                    ? score.TotalScore / map.RedAverageScore
+                    : score.TotalScore / map.BlueAverageScore;
             }
 
-            user.AverageScore = (user.AverageScore / user.MapsPlayed) * 100;
-            user.AverageAccuracy = (user.AverageAccuracy / user.MapsPlayed) * 100;
+            user.AverageScore = user.AverageScore / user.MapsPlayed * 100;
+            user.AverageAccuracy = user.AverageAccuracy / user.MapsPlayed * 100;
 
             float cost = 2.0f / (user.MapsPlayed + 2);
             user.MatchCostTotal = cost * matchAvg;

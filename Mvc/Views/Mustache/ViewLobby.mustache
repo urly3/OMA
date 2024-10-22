@@ -1,0 +1,49 @@
+{{> NavBar}}
+
+<div>
+	<a>{{Match.Name}}: BO {{Match.BestOf}}</a>
+	<br>
+	<br>
+
+	<a>blue team: {{Match.BlueWins}}</a>
+	<table>
+	<tr>
+		<th>username</th>
+		<th>played</th>
+		<th>avg. acc</th>
+		<th>avg. score</th>
+		<th>match cost</th>
+	</tr>
+	{{#BlueTeam}}
+	<tr>
+		<td>{{Username}}</td>
+		<td>{{MapsPlayed}}</td>
+		<td>{{AverageAccuracy}}</td>
+		<td>{{AverageScore}}</td>
+		<td>{{MatchCostTotal}}</td>
+	</tr>
+	{{/BlueTeam}}
+	</table>
+
+	<br>
+
+	<a>red team: {{Match.RedWins}}</a>
+	<table>
+	<tr>
+		<th>username</th>
+		<th>played</th>
+		<th>avg. acc</th>
+		<th>avg. score</th>
+		<th>match cost</th>
+	</tr>
+	{{#RedTeam}}
+	<tr>
+		<td>{{Username}}</td>
+		<td>{{MapsPlayed}}</td>
+		<td>{{AverageAccuracy}}</td>
+		<td>{{AverageScore}}</td>
+		<td>{{MatchCostTotal}}</td>
+	</tr>
+	{{/RedTeam}}
+	</table>
+</div>

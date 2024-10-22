@@ -1,6 +1,6 @@
-namespace OMA.Models.Internal;
+namespace OMA.Core.Models.Internal;
 
-class Score
+public class Score
 {
     public long UserId { get; set; }
     public long TotalScore { get; set; }

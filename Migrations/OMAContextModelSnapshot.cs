@@ -2,7 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using OMA.Data;
+using OMA.Core.Data;
+
 
 #nullable disable
 
