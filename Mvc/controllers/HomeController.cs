@@ -393,14 +393,14 @@ public class HomeController : Controller
 
         foreach (var file in filePaths)
         {
-            using (var streamReader = new StreamReader(string.Format($@".\Mvc\Views\Mustache\{file}.mustache"), Encoding.UTF8))
+            using (var streamReader = new StreamReader(string.Format($@".\wwwroot\templates\{file}.mustache"), Encoding.UTF8))
             {
                 partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
             }
         }
 
         // render passed in template
-        using (var streamReader = new StreamReader(string.Format($@".\Mvc\Views\Mustache\{template}.mustache"), Encoding.UTF8))
+        using (var streamReader = new StreamReader(string.Format($@".\wwwroot\templates\{template}.mustache"), Encoding.UTF8))
         {
             var output = stubble.Render(streamReader.ReadToEnd(), model, partials, null);
             return output;

@@ -1,8 +1,8 @@
 using OMA.Core.Data;
 
-var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions()
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
 {
-    WebRootPath = Directory.GetCurrentDirectory() + "/Mvc/www",
+    WebRootPath = System.AppDomain.CurrentDomain.BaseDirectory + "wwwroot",
 });
 
 // Add services to the container.
