@@ -1,9 +1,9 @@
 {{> NavBar}}
 
-{{#Lobbies}}
+{{#Dto.Lobbies}}
 	<form method="post" action="">
 		<input type="submit" value="{{LobbyName}}"/>
 		<input name="lobby" type="hidden" value="{{LobbyId}}"/>
 		<input name="lobby_name" type="hidden" value="{{LobbyName}}"/>
 	</form>
-{{/Lobbies}}
+{{/Dto.Lobbies}}

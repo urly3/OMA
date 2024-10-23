@@ -5,14 +5,14 @@ namespace OMA.Core.Models;
 
 public class ViewLobbyViewModel
 {
-    public AliasDto? AliasDto { get; set; }
+    public AliasDto? Dto { get; set; }
     public Match? Match { get; set; }
     public User[] BlueTeam { get; set; }
     public User[] RedTeam { get; set; }
 
     public ViewLobbyViewModel(AliasDto? dto, Match? mtc)
     {
-        AliasDto = dto;
+        Dto = dto;
         Match = mtc;
         if (Match == null)
         {

@@ -26,17 +26,6 @@ class OMAService
         return _context.GetAlias(aliasHash)?.Password != null;
     }
 
-    public OMAStatus AliasPasswordIsValid(string aliasHash, string passwordHash)
-    {
-        var alias = _context.GetAlias(aliasHash);
-        if (alias == null)
-        {
-            return OMAStatus.AliasDoesNotExist;
-        }
-
-        return alias.Password == passwordHash ? OMAStatus.PasswordMatches : OMAStatus.PasswordDoesNotMatch;
-    }
-
     public Alias? GetAlias(string aliasHash)
     {
         return _context.GetAlias(aliasHash);
@@ -75,9 +64,9 @@ class OMAService
         return _context.CreateAlias(aliasHash);
     }
 
-    public OMAStatus SetAliasPassword(AliasDto aliasDto, string passwordHash)
+    public OMAStatus SetAliasPassword(AliasDto dto, string passwordHash)
     {
-        Alias? alias = GetAliasFromDto(aliasDto);
+        Alias? alias = GetAliasFromDto(dto);
 
         if (alias == null)
         {
@@ -92,9 +81,9 @@ class OMAService
         return _context.SetAliasPassword(alias, passwordHash) ? OMAStatus.PasswordSet : OMAStatus.PasswordCouldNotBeSet;
     }
 
-    public OMAStatus UnsetAliasPassword(string aliasHash)
+    public OMAStatus UnsetAliasPassword(AliasDto dto, string passwordHash)
     {
-        Alias? alias = GetAlias(aliasHash);
+        Alias? alias = GetAliasFromDto(dto);
 
         if (alias == null)
         {
@@ -104,6 +93,11 @@ class OMAService
         if (alias.Password == null)
         {
             return OMAStatus.AliasIsUnlocked;
+        }
+
+        if (alias.Password != passwordHash)
+        {
+            return OMAStatus.PasswordDoesNotMatch;
         }
 
         return _context.RemoveAliasPassword(alias) ? OMAStatus.PasswordSet : OMAStatus.PasswordCouldNotBeSet;
@@ -171,9 +165,9 @@ class OMAService
         return _context.AddLobbyToAlias(alias, lobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
     }
 
-    public OMAStatus RemoveLobbyFromAlias(AliasDto aliasDto, long lobbyId, string lobbyName)
+    public OMAStatus RemoveLobbyFromAlias(AliasDto dto, long lobbyId, string lobbyName)
     {
-        Alias? alias = GetAliasFromDto(aliasDto);
+        Alias? alias = GetAliasFromDto(dto);
         if (alias == null)
         {
             return OMAStatus.AliasDoesNotExist;
