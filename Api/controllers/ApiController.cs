@@ -70,66 +70,6 @@ public class ApiController : Controller
         return Ok("alias created.");
     }
 
-    // change to post(?) when things are more concrete.
-    [HttpGet("set_password")]
-    public ActionResult SetPassword()
-    {
-        string? alias = Request.Query["alias"];
-        if (string.IsNullOrEmpty(alias))
-        {
-            return BadRequest("parameter 'alias' not provided.");
-        }
-
-        alias = OMAUtil.HashString(alias);
-
-        string? password = Request.Query["password"];
-        if (string.IsNullOrEmpty(password))
-        {
-            return BadRequest("parameter 'password' not provided.");
-        }
-
-        password = OMAUtil.HashString(password);
-
-        switch (_omaService.SetAliasPassword(alias, password))
-        {
-            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
-            case OMAStatus.AliasIsLocked: return BadRequest("alias is locked.");
-            case OMAStatus.PasswordCouldNotBeSet: throw new Exception("password could not be set.");
-            case OMAStatus.PasswordSet: return Ok("password set.");
-            default: throw new Exception("unhandled state.");
-        }
-    }
-
-    // change to post(?) when things are more concrete.
-    [HttpGet("unset_password")]
-    public ActionResult UnsetPassword()
-    {
-        string? alias = Request.Query["alias"];
-        if (string.IsNullOrEmpty(alias))
-        {
-            return BadRequest("parameter 'alias' not provided.");
-        }
-
-        alias = OMAUtil.HashString(alias);
-
-        string? password = Request.Query["password"];
-        if (string.IsNullOrEmpty(password))
-        {
-            return BadRequest("parameter 'password' not provided.");
-        }
-
-        password = OMAUtil.HashString(password);
-
-        switch (_omaService.UnsetAliasPassword(alias))
-        {
-            case OMAStatus.AliasDoesNotExist: return BadRequest("alias does not exist.");
-            case OMAStatus.AliasIsUnlocked: return BadRequest("alias is already unlocked.");
-            case OMAStatus.PasswordCouldNotBeSet: throw new Exception("password could not unset.");
-            case OMAStatus.PasswordSet: return Ok("password unset.");
-            default: throw new Exception("unhandled state.");
-        }
-    }
-
     [HttpGet("get_match")]
     public ActionResult GetMatch()
     {

@@ -75,9 +75,9 @@ class OMAService
         return _context.CreateAlias(aliasHash);
     }
 
-    public OMAStatus SetAliasPassword(string aliasHash, string passwordHash)
+    public OMAStatus SetAliasPassword(AliasDto aliasDto, string passwordHash)
     {
-        Alias? alias = GetAlias(aliasHash);
+        Alias? alias = GetAliasFromDto(aliasDto);
 
         if (alias == null)
         {
@@ -171,9 +171,9 @@ class OMAService
         return _context.AddLobbyToAlias(alias, lobby) ? OMAStatus.LobbyAdded : OMAStatus.LobbyCouldNotBeAdded;
     }
 
-    public OMAStatus RemoveLobbyFromAlias(string aliasHash, long lobbyId, string lobbyName)
+    public OMAStatus RemoveLobbyFromAlias(AliasDto aliasDto, long lobbyId, string lobbyName)
     {
-        Alias? alias = GetAlias(aliasHash);
+        Alias? alias = GetAliasFromDto(aliasDto);
         if (alias == null)
         {
             return OMAStatus.AliasDoesNotExist;

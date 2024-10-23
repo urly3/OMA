@@ -63,13 +63,14 @@ public class HomeController : Controller
     [HttpPost("addlobby")]
     public IActionResult AddLobby()
     {
+        var aliasDto = CheckAndGetAliasDtoFromCookie();
+
         if (Request.Method == "GET")
         {
-            var aliasDto = CheckAndGetAliasDtoFromCookie();
             return Content(RenderStubbleTemplate("AddLobby", aliasDto), "text/html");
         }
 
-        var aliasHash = Request.Cookies["aliasHash"];
+        var aliasHash = Request.Cookies["alias_hash"];
 
         if (string.IsNullOrWhiteSpace(aliasHash))
         {
@@ -108,22 +109,16 @@ public class HomeController : Controller
     [HttpPost("removelobby")]
     public IActionResult RemoveLobby()
     {
+        var aliasDto = CheckAndGetAliasDtoFromCookie();
+        if (aliasDto == null)
+        {
+            return BadRequest("invalid alias");
+        }
 
         if (Request.Method == "GET")
         {
-            var aliasDto = CheckAndGetAliasDtoFromCookie();
-            if (aliasDto == null)
-            {
-                return BadRequest("invalid alias");
-            }
 
             return Content(RenderStubbleTemplate("RemoveLobby", aliasDto), "text/html");
-        }
-
-        var aliasHash = Request.Cookies["aliasHash"];
-        if (string.IsNullOrWhiteSpace(aliasHash))
-        {
-            return BadRequest("alias not set");
         }
 
         long? lobbyId = GetLobbyFromForm();
@@ -139,7 +134,7 @@ public class HomeController : Controller
         }
 
         // TODO: flesh this out for all error statuses
-        switch (_omaService.RemoveLobbyFromAlias(aliasHash, lobbyId.Value, lobbyName))
+        switch (_omaService.RemoveLobbyFromAlias(aliasDto, lobbyId.Value, lobbyName))
         {
             case OMAStatus.LobbyRemoved:
                 return Redirect("/");
@@ -160,9 +155,41 @@ public class HomeController : Controller
 
         string aliasHash = OMAUtil.HashString(alias);
 
-        Response.Cookies.Append("aliasHash", aliasHash);
+        Response.Cookies.Append("alias_hash", aliasHash);
 
         return Redirect("/");
+    }
+
+    [HttpPost("lock")]
+    [HttpGet("lock")]
+    public IActionResult Lock()
+    {
+        var aliasDto = CheckAndGetAliasDtoFromCookie();
+        if (aliasDto == null)
+        {
+            return BadRequest("invalid alias");
+        }
+
+        if (Request.Method == "GET")
+        {
+            return Content(RenderStubbleTemplate("lock", aliasDto), "text/html");
+        }
+
+        var password = GetPasswordFromForm();
+        if (password == null)
+        {
+            return BadRequest("password not provided");
+        }
+
+        var passwordHash = OMAUtil.HashString(password);
+
+        switch (_omaService.SetAliasPassword(aliasDto, passwordHash))
+        {
+            case OMAStatus.PasswordSet:
+                return Redirect("/");
+            default:
+                return BadRequest("unhandled error status");
+        }
     }
 
     [Route("error")]
@@ -174,7 +201,7 @@ public class HomeController : Controller
 
     private AliasDto? CheckAndGetAliasDtoFromCookie()
     {
-        var aliasHash = Request.Cookies["aliasHash"];
+        var aliasHash = Request.Cookies["alias_hash"];
         if (string.IsNullOrWhiteSpace(aliasHash))
         {
             return null;
@@ -261,6 +288,28 @@ public class HomeController : Controller
         }
 
         return warmups;
+    }
+
+    private string? GetPasswordFromForm()
+    {
+        var password = Request.Form["password"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return null;
+        }
+
+        return password;
+    }
+
+    private string? GetPasswordFromCookie()
+    {
+        var passwordHash = Request.Cookies["password_hash"];
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            return null;
+        }
+
+        return passwordHash;
     }
 
     private string RenderStubbleTemplate(string template, dynamic? model)
