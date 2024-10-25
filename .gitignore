@@ -2,5 +2,6 @@ bin/
 obj/
 .vs/
 .vscode/
+properties/
 !omadb.db
 omadb.db.*
