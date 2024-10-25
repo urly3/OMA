@@ -12,3 +12,14 @@ it uses sqlite for persistence, efcore for orm, and mustache/stubble for templat
 i really enjoyed how simply this stack was to use, and look forward to diving into css to make it pretty (the site is only markup, as you can probably see)
 
 i have some ideas that i may implement if i feel like it to make things a bit more useful
+
+## running
+
+```
+git clone
+cd oma
+dotnet run
+```
+
+use osu world cup wiki for some matches you can use as an example
+lobby id's are at the end of the multiplayer link provided with the wiki's results section
