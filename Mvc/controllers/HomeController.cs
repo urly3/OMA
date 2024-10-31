@@ -388,6 +388,7 @@ public class HomeController : Controller
         var filePaths = new string[]
         {
             @"NavBar",
+            @"Footer",
         };
         var partials = new Dictionary<string, string>();
 
