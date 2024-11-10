@@ -34,6 +34,7 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
 	background: #2e1818;
+	transition: backgroundr 66ms linear;
 }
 
 .remove_lobby {
@@ -47,4 +48,8 @@ input[type="submit"]:hover {
 	width: 100px;
 	padding: 8px;
 	margin: 6px;
+}
+
+.add_lobby_form label,  input {
+	padding: 8px;
 }
