@@ -1,13 +1,17 @@
 using OMA.Core.Data;
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
+var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions()
 {
-    WebRootPath = System.AppDomain.CurrentDomain.BaseDirectory + "wwwroot",
+    //WebRootPath = Directory.GetCurrentDirectory() + "\\wwwroot",
 });
+
+builder.WebHost.UseIIS();
+builder.WebHost.UseIISIntegration();
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddScoped<OMAContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,0 +1,50 @@
+* {
+	color: #f5f2f2;
+}
+
+html {
+	background: #242323;
+}
+
+nav {
+	position: relative;
+	padding: 5px;
+	text-align: center;
+}
+
+main {
+	padding: 5px;
+}
+
+.nav_item {
+	padding: 8px;
+	margin: 6px;
+	border-bottom: solid 2px #5c3535;
+	text-decoration: none;
+}
+
+input[type="text"] {
+	color: black;
+}
+
+input[type="submit"] {
+	background-color: inherit;
+	cursor: pointer;
+}
+
+input[type="submit"]:hover {
+	background: #2e1818;
+}
+
+.remove_lobby {
+	padding: 8px;
+	margin: 6px;
+	min-width: 100%;
+}
+
+.add_lobby_form label,  input[type="submit"] {
+	display: inline-flex;
+	width: 100px;
+	padding: 8px;
+	margin: 6px;
+}

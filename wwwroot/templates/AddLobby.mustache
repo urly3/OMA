@@ -1,19 +1,36 @@
 {{> NavBar}}
 
-<form action="" enctype="multipart/form-data" method="post">
-	<label>lobby name</label>
-	<input name="lobby_name" type="text"/>
+<fieldset>
+<legend>
+	add a lobby
+</legend>
 
-	<label>lobby   id</label>
-	<input name="lobby" type="text" pattern="[0-9]+"/>
+<form class="add_lobby_form" action="" enctype="multipart/form-data" method="post">
+	<div>
+	<label for="name"> lobby name </label>
+	<input id="name" name="lobby_name" type="text" required />
+	</div>
 
-	<label>best    of</label>
-	<input name="best_of" type="number"/>
+	<div>
+	<label for="id"> lobby id </label>
+	<input id="id" name="lobby" type="text" pattern="[0-9]+" required />
+	</div>
 
-	<label>warmups</label>
-	<input name="warmups" type="number"/>
+	<div>
+	<label for="best"> best of </label>
+	<input id="best" name="best_of" type="number" placeholder="0" />
+	</div>
 
-	<input type="submit"/>
+	<div>
+	<label for="warm"> warmups </label>
+	<input id="warm" name="warmups" type="number" placeholder="0" />
+	</div>
+
+	<div>
+	<input type="submit" />
+	</div>
 </form>
+
+</fieldset>
 
 {{> Footer}}
