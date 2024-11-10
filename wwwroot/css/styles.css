@@ -1,4 +1,5 @@
 * {
+	font-family: monospace;
 	color: #f5f2f2;
 }
 
@@ -17,10 +18,16 @@ main {
 }
 
 .nav_item {
-	padding: 8px;
-	margin: 6px;
+	padding: 16px;
 	border-bottom: solid 2px #5c3535;
 	text-decoration: none;
+}
+
+.nav_item:not(input):hover {
+	background: #5c3535;
+	border-color: #f5f2f2;
+	transition: background 66ms linear;
+	transition: border-color: white 66ms linear;
 }
 
 input[type="text"] {
@@ -34,7 +41,7 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
 	background: #2e1818;
-	transition: backgroundr 66ms linear;
+	transition: background 66ms linear;
 }
 
 .remove_lobby {
