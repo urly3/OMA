@@ -44,6 +44,7 @@ input {
 }
 
 input[type="submit"] {
+	color: inherit;
 	background-color: inherit;
 	cursor: pointer;
 }
