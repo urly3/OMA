@@ -25,7 +25,7 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         var dto = CheckAndGetAliasDtoFromCookie();
-        if (dto == null && Request.Cookies["aliasHash"] == null)
+        if (dto == null && Request.Cookies["alias_hash"] == null)
         {
             dto = _omaService.GetAliasAsDto(OMAUtil.HashString("kane"));
         }
