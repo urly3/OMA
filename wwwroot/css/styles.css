@@ -26,7 +26,7 @@ fieldset {
 	margin: 0px;
 }
 .nav_item {
-	min-width: 3em;
+	min-width: 4em;
 	padding: 16px;
 	border-bottom: solid 2px #5c3535;
 	text-decoration: none;
