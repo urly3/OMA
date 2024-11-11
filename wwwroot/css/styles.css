@@ -8,16 +8,25 @@ html {
 }
 
 nav {
-	position: relative;
+	width: 100%;
 	padding: 5px;
+	display: inline-flex;
+	position: relative;
 	text-align: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	box-sizing: border-box;
 }
 
 main {
 	padding: 5px;
 }
 
+fieldset {
+	margin: 0px;
+}
 .nav_item {
+	min-width: 3em;
 	padding: 16px;
 	border-bottom: solid 2px #5c3535;
 	text-decoration: none;
@@ -27,7 +36,7 @@ main {
 	background: #5c3535;
 	border-color: #f5f2f2;
 	transition: background 66ms linear;
-	transition: border-color: white 66ms linear;
+	transition: border-color white 66ms linear;
 }
 
 input[type="text"] {
