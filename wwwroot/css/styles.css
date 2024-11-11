@@ -56,17 +56,18 @@ input[type="submit"]:hover {
 
 .remove_lobby {
 	padding: 8px;
-	margin: 6px;
+	margin-top: 6px;
+	margin-bottom: 6px;
 	min-width: 100%;
 }
 
-.add_lobby_form label,  input[type="submit"] {
+.add_lobby_form label, .add_lobby_form input[type="submit"] {
 	display: inline-flex;
 	width: 100px;
 	padding: 8px;
 	margin: 6px;
 }
 
-.add_lobby_form label,  input {
+.add_lobby_form label, .add_lobby_form input {
 	padding: 8px;
 }
