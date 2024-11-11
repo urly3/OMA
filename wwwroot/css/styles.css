@@ -39,7 +39,7 @@ fieldset {
 	transition: border-color white 66ms linear;
 }
 
-input[type="text"] {
+input {
 	color: black;
 }
 
