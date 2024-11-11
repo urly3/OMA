@@ -25,6 +25,10 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         var dto = CheckAndGetAliasDtoFromCookie();
+        if (dto == null)
+        {
+            dto = _omaService.GetAliasAsDto(OMAUtil.HashString("kane"));
+        }
 
         Response.Headers["content-type"] = "text/hmtl";
         return Content(RenderStubbleTemplate("Index", new BlankViewModel(dto)), "text/html");
@@ -36,7 +40,7 @@ public class HomeController : Controller
         var lobbyId = GetLobbyFromQuery();
         if (lobbyId == null)
         {
-            return Problem("invalid lobby");
+            return Problem("invalid lobby", statusCode: 400);
         }
 
         var dto = CheckAndGetAliasDtoFromCookie();
@@ -45,7 +49,7 @@ public class HomeController : Controller
 
         if (bestOf == null || warmups == null)
         {
-            return Problem("invalid bestof / warmups");
+            return Problem("invalid bestof / warmups", statusCode: 400);
         }
 
         var match = _omaService.GetMatch(lobbyId.Value, bestOf.Value, warmups.Value);
@@ -63,10 +67,17 @@ public class HomeController : Controller
     [HttpPost("addlobby")]
     public IActionResult AddLobby()
     {
+        var aliasHash = Request.Cookies["alias_hash"];
+
+        if (string.IsNullOrWhiteSpace(aliasHash))
+        {
+            return Problem("no alias set", statusCode: 400);
+        }
+
         var dto = CheckAndGetAliasDtoFromCookie();
         if (dto != null && dto.Locked)
         {
-            return Problem("alias is locked");
+            return Problem("alias is locked", statusCode: 400);
         }
 
         if (Request.Method == "GET")
@@ -74,17 +85,10 @@ public class HomeController : Controller
             return Content(RenderStubbleTemplate("AddLobby", new BlankViewModel(dto)), "text/html");
         }
 
-        var aliasHash = Request.Cookies["alias_hash"];
-
-        if (string.IsNullOrWhiteSpace(aliasHash))
-        {
-            return Problem("no alias set");
-        }
-
         var lobbyId = GetLobbyFromForm();
         if (lobbyId == null)
         {
-            return Problem("lobbyId not a valid number.");
+            return Problem("lobbyId not a valid number.", statusCode: 400);
         }
 
         var bestOf = GetBestOfFromForm();
@@ -92,7 +96,7 @@ public class HomeController : Controller
 
         if (bestOf == null || warmups == null)
         {
-            return Problem("invalid bestof / warmups");
+            return Problem("invalid bestof / warmups", statusCode: 400);
         }
 
         var lobbyName = Request.Form["lobby_name"];
@@ -116,12 +120,12 @@ public class HomeController : Controller
         var dto = CheckAndGetAliasDtoFromCookie();
         if (dto == null)
         {
-            return Problem("invalid alias");
+            return Problem("invalid alias", statusCode: 400);
         }
 
         if (dto.Locked)
         {
-            return Problem("alias is locked");
+            return Problem("alias is locked", statusCode: 400);
         }
 
         if (Request.Method == "GET")
@@ -133,13 +137,13 @@ public class HomeController : Controller
         long? lobbyId = GetLobbyFromForm();
         if (lobbyId == null)
         {
-            return Problem("invalid lobby");
+            return Problem("invalid lobby", statusCode: 400);
         }
 
         string? lobbyName = Request.Form["lobby_name"];
         if (lobbyName == null)
         {
-            return Problem("lobby name not provided");
+            return Problem("lobby name not provided", statusCode: 400);
         }
 
         // TODO: flesh this out for all error statuses
@@ -176,12 +180,12 @@ public class HomeController : Controller
         var dto = CheckAndGetAliasDtoFromCookie();
         if (dto == null)
         {
-            return Problem("invalid alias");
+            return Problem("invalid alias", statusCode: 400);
         }
 
         if (dto.Locked)
         {
-            return Problem("alias is locked");
+            return Problem("alias is locked", statusCode: 400);
         }
 
         if (Request.Method == "GET")
@@ -192,7 +196,7 @@ public class HomeController : Controller
         var password = GetPasswordFromForm();
         if (password == null)
         {
-            return Problem("password not provided");
+            return Problem("password not provided", statusCode: 400);
         }
 
         var passwordHash = OMAUtil.HashString(password);
@@ -213,7 +217,7 @@ public class HomeController : Controller
         var dto = CheckAndGetAliasDtoFromCookie();
         if (dto == null)
         {
-            return Problem("invalid alias");
+            return Problem("invalid alias", statusCode: 400);
         }
 
         if (Request.Method == "GET")
@@ -224,7 +228,7 @@ public class HomeController : Controller
         var password = GetPasswordFromForm();
         if (password == null)
         {
-            return Problem("password not provided");
+            return Problem("password not provided", statusCode: 400);
         }
 
         var passwordHash = OMAUtil.HashString(password);

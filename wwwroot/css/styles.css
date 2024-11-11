@@ -64,10 +64,27 @@ input[type="submit"]:hover {
 .add_lobby_form label, .add_lobby_form input[type="submit"] {
 	display: inline-flex;
 	width: 100px;
-	padding: 8px;
 	margin: 6px;
 }
 
 .add_lobby_form label, .add_lobby_form input {
+	padding: 8px;
+}
+
+.add_lobby_form input[type=text], .add_lobby_form input[type=number] {
+	border-bottom: solid 2px grey;
+}
+
+.lock_form input {
+	margin: 6px;
+}
+
+.lock_form input[type="password"] {
+	padding: 8px;
+	border-bottom: solid 2px grey;
+}
+
+.lock_form input[type="submit"] {
+	width: 100px;
 	padding: 8px;
 }

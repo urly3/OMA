@@ -1,7 +1,18 @@
 {{> NavBar}}
 
-<form method="post" action="">
-	<input name="password" type="password"/>
+<fieldset>
+<legend> lock current alias </legend>
+
+<form class="lock_form" method="post" action="">
+	<div>
+	<input name="password" type="password" placeholder="password" />
+	</div>
+
+	<div>
+	<input type="submit" />
+	</div>
 </form>
+
+</fieldset>
 
 {{> Footer}}
