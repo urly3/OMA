@@ -34,9 +34,9 @@ fieldset {
 
 .nav_item:not(input):hover {
 	background: #5c3535;
-	border-color: #f5f2f2;
+	/* border-color: #f5f2f2; */
 	transition: background 66ms linear;
-	transition: border-color white 66ms linear;
+	/* transition: border-color white 66ms linear; */
 }
 
 input {

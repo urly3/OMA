@@ -13,19 +13,19 @@
 <div>
 	<form action="setalias" method="post">
 	<nav>
-		<a class="nav_item" href="/">list</a>
+		<a id="nav_list" class="nav_item" href="/">list</a>
 		{{^Dto}}
-		<a class="nav_item" href="/addlobby">add</a>
+		<a id="nav_add" class="nav_item" href="/addlobby">add</a>
 		{{/Dto}}
 
 		{{#Dto}}
 		{{^Dto.Locked}}
-		<a class="nav_item" href="/addlobby">add</a>
-		<a class="nav_item" href="/removelobby">remove</a>
-		<a class="nav_item" href="/lock">lock</a>
+		<a id="nav_add" class="nav_item" href="/addlobby">add</a>
+		<a id="nav_remove" class="nav_item" href="/removelobby">remove</a>
+		<a id="nav_lock" class="nav_item" href="/lock">lock</a>
 		{{/Dto.Locked}}
 		{{#Dto.Locked}}
-		<a class="nav_item" href="/unlock">unlock</a>
+		<a id="nav_unlock" class="nav_item" href="/unlock">unlock</a>
 		{{/Dto.Locked}}
 		{{/Dto}}
 		<input class="nav_item" id ="alias" name="alias" type="text" placeholder="alias" style="display: inline"/>
