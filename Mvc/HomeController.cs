@@ -150,7 +150,7 @@ public class HomeController : Controller
         switch (_omaService.RemoveLobbyFromAlias(dto, lobbyId.Value, lobbyName))
         {
             case OMAStatus.LobbyRemoved:
-                return Redirect("/");
+                return Redirect(Url.Action()!);
             default:
                 return Problem("unhandled error status");
         }
