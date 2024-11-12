@@ -4,7 +4,7 @@ public enum Team
 {
     None,
     Blue,
-    Red,
+    Red
 }
 
 public class Match

@@ -5,11 +5,6 @@ namespace OMA.Core.Models;
 
 public class ViewLobbyViewModel
 {
-    public AliasDto? Dto { get; set; }
-    public Match? Match { get; set; }
-    public User[] BlueTeam { get; set; }
-    public User[] RedTeam { get; set; }
-
     public ViewLobbyViewModel(AliasDto? dto, Match? mtc)
     {
         Dto = dto;
@@ -30,8 +25,14 @@ public class ViewLobbyViewModel
                 user.MatchCostTotal = (float)Math.Round(user.MatchCostTotal, 2);
                 user.MatchCostTeam = (float)Math.Round(user.MatchCostTeam, 2);
             }
+
             BlueTeam = Match.Users.Where(u => u.Team == Team.Blue).OrderByDescending(u => u.MatchCostTotal).ToArray();
             RedTeam = Match.Users.Where(u => u.Team == Team.Red).OrderByDescending(u => u.MatchCostTotal).ToArray();
         }
     }
+
+    public AliasDto? Dto { get; set; }
+    public Match? Match { get; set; }
+    public User[] BlueTeam { get; set; }
+    public User[] RedTeam { get; set; }
 }

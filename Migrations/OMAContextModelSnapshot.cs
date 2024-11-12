@@ -9,7 +9,7 @@ using OMA.Core.Data;
 
 namespace OMA.Migrations
 {
-    [DbContext(typeof(OMAContext))]
+    [DbContext(typeof(OmaContext))]
     partial class OMAContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

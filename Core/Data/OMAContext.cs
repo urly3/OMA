@@ -3,15 +3,12 @@ using OMA.Core.Models;
 
 namespace OMA.Core.Data;
 
-public class OMAContext : DbContext
+public class OmaContext : DbContext
 {
-    private string _connectionString = "Data Source=oma.db";
-    public DbSet<Lobby> Lobbies { get; set; } = default!;
-    public DbSet<Alias> Aliases { get; set; } = default!;
+    private readonly string _connectionString = "Data Source=oma.db";
 
-    public OMAContext()
-    {
-    }
+    private DbSet<Lobby> Lobbies { get; set; } = default!;
+    private DbSet<Alias> Aliases { get; set; } = default!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -21,10 +18,7 @@ public class OMAContext : DbContext
     internal Alias? GetAlias(string aliasHash)
     {
         var alias = Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Hash == aliasHash);
-        if (alias == null)
-        {
-            return null;
-        }
+        if (alias == null) return null;
 
         return alias;
     }
@@ -36,9 +30,9 @@ public class OMAContext : DbContext
 
     internal Alias? CreateAlias(string aliasHash)
     {
-        var alias = Aliases.Add(new()
+        var alias = Aliases.Add(new Alias
         {
-            Hash = aliasHash,
+            Hash = aliasHash
         });
 
         try
@@ -124,6 +118,7 @@ public class OMAContext : DbContext
 
     internal Lobby? GetLobbyEqual(string lobbyName, long lobbyId, int bestOf, int warmups)
     {
-        return Lobbies.FirstOrDefault(l => l.LobbyName == lobbyName && l.LobbyId == lobbyId && l.BestOf == bestOf && l.Warmups == warmups);
+        return Lobbies.FirstOrDefault(l =>
+            l.LobbyName == lobbyName && l.LobbyId == lobbyId && l.BestOf == bestOf && l.Warmups == warmups);
     }
 }

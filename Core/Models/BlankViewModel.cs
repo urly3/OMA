@@ -2,13 +2,12 @@ using OMA.Core.Models.Dto;
 
 namespace OMA.Core.Models;
 
-
-class BlankViewModel
+internal class BlankViewModel
 {
-    public AliasDto? Dto { get; set; }
-
     public BlankViewModel(AliasDto? dto)
     {
         Dto = dto;
     }
+
+    public AliasDto? Dto { get; set; }
 }

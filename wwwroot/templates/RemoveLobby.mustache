@@ -1,28 +1,30 @@
 {{> NavBar}}
 
 <style>
-#nav_remove { border-bottom: solid 2px #f5f2f2; }
+    #nav_remove {
+        border-bottom: solid 2px #f5f2f2;
+    }
 </style>
 
 <fieldset>
 
-<legend>
-	remove a lobby
-</legend>
+    <legend>
+        remove a lobby
+    </legend>
 
-{{#Dto.Lobbies}}
+    {{#Dto.Lobbies}}
 
-<form method="post" action="">
-	<input class="remove_lobby"type="submit" value="{{LobbyName}}"/>
-	<input name="lobby" type="hidden" value="{{LobbyId}}"/>
-	<input name="lobby_name" type="hidden" value="{{LobbyName}}"/>
-</form>
+        <form method="post" action="">
+            <input class="remove_lobby" type="submit" value="{{LobbyName}}"/>
+            <input name="lobby" type="hidden" value="{{LobbyId}}"/>
+            <input name="lobby_name" type="hidden" value="{{LobbyName}}"/>
+        </form>
 
-{{/Dto.Lobbies}}
+    {{/Dto.Lobbies}}
 
-{{^Dto.Lobbies}}
-<p> no lobbies found </p>
-{{/Dto.Lobbies}}
+    {{^Dto.Lobbies}}
+        <p> no lobbies found </p>
+    {{/Dto.Lobbies}}
 
 </fieldset>
 

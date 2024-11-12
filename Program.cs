@@ -1,6 +1,6 @@
 using OMA.Core.Data;
 
-var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions()
+var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions
 {
     //WebRootPath = Directory.GetCurrentDirectory() + "\\wwwroot",
 });
@@ -10,7 +10,7 @@ builder.WebHost.UseIISIntegration();
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddScoped<OMAContext>();
+builder.Services.AddScoped<OmaContext>();
 
 var app = builder.Build();
 

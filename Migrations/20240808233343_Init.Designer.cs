@@ -10,7 +10,7 @@ using OMA.Core.Data;
 
 namespace OMA.Migrations
 {
-    [DbContext(typeof(OMAContext))]
+    [DbContext(typeof(OmaContext))]
     [Migration("20240808233343_Init")]
     partial class Init
     {

@@ -1,39 +1,41 @@
 {{> NavBar}}
 
 <style>
-#nav_add { border-bottom: solid 2px #f5f2f2; }
+    #nav_add {
+        border-bottom: solid 2px #f5f2f2;
+    }
 </style>
 
 <fieldset>
-<legend>
-	add a lobby
-</legend>
+    <legend>
+        add a lobby
+    </legend>
 
-<form class="add_lobby_form" action="" enctype="multipart/form-data" method="post">
-	<div>
-	<label for="name"> lobby name </label>
-	<input id="name" name="lobby_name" type="text" placeholder="default: multi name" />
-	</div>
+    <form class="add_lobby_form" action="" enctype="multipart/form-data" method="post">
+        <div>
+            <label for="name"> lobby name </label>
+            <input id="name" name="lobby_name" type="text" placeholder="default: multi name"/>
+        </div>
 
-	<div>
-	<label for="id"> lobby id * </label>
-	<input id="id" name="lobby" type="text" pattern="[0-9]+" required />
-	</div>
+        <div>
+            <label for="id"> lobby id * </label>
+            <input id="id" name="lobby" type="text" pattern="[0-9]+" required/>
+        </div>
 
-	<div>
-	<label for="best"> best of </label>
-	<input id="best" name="best_of" type="number" placeholder="0" />
-	</div>
+        <div>
+            <label for="best"> best of </label>
+            <input id="best" name="best_of" type="number" placeholder="0"/>
+        </div>
 
-	<div>
-	<label for="warm"> warmups </label>
-	<input id="warm" name="warmups" type="number" placeholder="0" />
-	</div>
+        <div>
+            <label for="warm"> warmups </label>
+            <input id="warm" name="warmups" type="number" placeholder="0"/>
+        </div>
 
-	<div>
-	<input type="submit" value="add" />
-	</div>
-</form>
+        <div>
+            <input type="submit" value="add"/>
+        </div>
+    </form>
 
 </fieldset>
 

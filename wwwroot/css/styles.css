@@ -1,153 +1,163 @@
 * {
-	font-family: monospace;
-	color: #f5f2f2;
+    font-family: monospace;
+    color: #f5f2f2;
 }
 
 html {
-	background: #242323;
+    background: #242323;
 }
 
 nav {
-	width: 100%;
-	padding: 5px;
-	display: inline-flex;
-	position: relative;
-	text-align: center;
-	justify-content: center;
-	flex-wrap: wrap;
-	box-sizing: border-box;
+    width: 100%;
+    padding: 5px;
+    display: inline-flex;
+    position: relative;
+    text-align: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    box-sizing: border-box;
 }
 
 main {
-	padding: 5px;
+    padding: 5px;
 }
 
 fieldset {
-	margin: 0px;
+    margin: 0;
 }
+
 .nav_item {
-	min-width: 4em;
-	padding: 16px;
-	border-bottom: solid 2px #5c3535;
-	text-decoration: none;
+    min-width: 4em;
+    padding: 16px;
+    border-bottom: solid 2px #5c3535;
+    text-decoration: none;
 }
 
 .nav_item:not(input):hover {
-	background: #5c3535;
-	/* border-color: #f5f2f2; */
-	transition: background 66ms linear;
-	/* transition: border-color white 66ms linear; */
+    background: #5c3535;
+    /* border-color: #f5f2f2; */
+    transition: background 66ms linear;
+    /* transition: border-color white 66ms linear; */
 }
 
 input {
-	color: black;
+    color: black;
 }
 
 input[type="submit"] {
-	color: inherit;
-	background-color: inherit;
-	cursor: pointer;
+    color: inherit;
+    background-color: inherit;
+    cursor: pointer;
 }
 
 input[type="submit"]:hover {
-	background: #2e1818;
-	transition: background 66ms linear;
+    background: #2e1818;
+    transition: background 66ms linear;
 }
 
 .remove_lobby {
-	padding: 8px;
-	margin-top: 6px;
-	margin-bottom: 6px;
-	min-width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    min-width: 100%;
 }
 
 .add_lobby_form label, .add_lobby_form input[type="submit"] {
-	display: inline-flex;
-	width: 100px;
-	margin: 6px;
+    display: inline-flex;
+    width: 100px;
+    margin: 6px;
 }
 
 .add_lobby_form label, .add_lobby_form input {
-	padding: 8px;
+    padding: 8px;
 }
 
 .add_lobby_form input[type=text], .add_lobby_form input[type=number] {
-	border-bottom: solid 2px grey;
+    border-bottom: solid 2px grey;
 }
 
 .lock_form input {
-	margin: 6px;
+    margin: 6px;
 }
 
 .lock_form input[type="password"] {
-	padding: 8px;
-	border-bottom: solid 2px grey;
+    padding: 8px;
+    border-bottom: solid 2px grey;
 }
 
 .lock_form input[type="submit"] {
-	width: 100px;
-	padding: 8px;
+    width: 100px;
+    padding: 8px;
 }
 
 li:nth-child(1n+2) {
-	margin-top: 12px;
+    margin-top: 12px;
 }
 
 input:focus {
-	outline: solid 2px #5c3535;
+    outline: solid 2px #5c3535;
 }
 
 table {
-	border-collapse: collapse;
-	text-align: left;
-	display: inline-block;
-	padding: 1rem;
-	vertical-align: top;
-	margin: 5px;
+    border-collapse: collapse;
+    text-align: left;
+    display: inline-block;
+    padding: 1rem;
+    vertical-align: top;
+    margin: 5px;
 }
 
 table *:not(img) {
-	padding: 6px;
-	text-align: left;
-	vertical-align: middle;
+    padding: 6px;
+    text-align: left;
+    vertical-align: middle;
 }
 
 table span {
-	display: inline-block;
-	width: 3rem;
-	height: auto;
+    display: inline-block;
+    width: 3rem;
+    height: auto;
 }
 
 tbody th {
-	max-width: 9rem;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+    display: inline-block;
+    width: 25vw;
+    max-width: 12rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 span img {
-	box-sizing: border-box;
-	vertical-align: middle;
-	width: 100%;
-	height: auto;
+    box-sizing: border-box;
+    vertical-align: middle;
+    width: 100%;
+    height: auto;
 }
 
 .red_team_table {
-	border: solid 2px #666666;
-	& td {
-		border-top: solid 2px #f5424280;
-	}
+    & tbody th {
+        border-left: solid 2px #f5424280;
+    }
+
+
+    & td {
+        border-top: solid 2px #f5424280;
+    }
 }
 
 .blue_team_table {
-	border: solid 2px #666666;
-	& td {
-		border-top: solid 2px #4287f580;
-	}
+    & tbody th {
+        border-left: solid 2px #4287f580;
+    }
+    
+    & td {
+        border-top: solid 2px #4287f580;
+    }
 }
 
 .table_container {
-	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
 }

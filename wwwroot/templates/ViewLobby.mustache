@@ -1,57 +1,57 @@
 {{> NavBar}}
 
 <header>
-	<h1>{{Match.Name}}: BO {{Match.BestOf}}</h1>
+    <h1>{{Match.Name}}: BO {{Match.BestOf}}</h1>
 </header>
 
 <div class="table_container">
-	<table class="blue_team_table">
-	<caption>blue team: {{Match.BlueWins}}</caption>
-	<thead>
-		<tr>
-			<th>username</th>
-			<th>played</th>
-			<th>avg acc</th>
-			<th>avg score</th>
-			<th>match cost</th>
-		</tr>
-	</thead>
-	<tbody>
-	{{#BlueTeam}}
-	<tr>
-		<th><span><image src="{{AvatarUrl}}" alt="user avatar"></span>{{Username}}</td>
-		<td>{{MapsPlayed}}</td>
-		<td>{{AverageAccuracy}}</td>
-		<td>{{AverageScore}}</td>
-		<td>{{MatchCostTotal}}</td>
-	</tr>
-	{{/BlueTeam}}
-	</tbody>
-	</table>
+    <table class="blue_team_table">
+        <caption>blue team: {{Match.BlueWins}}</caption>
+        <thead>
+        <tr>
+            <th>username</th>
+            <th>played</th>
+            <th>avg acc</th>
+            <th>avg score</th>
+            <th>cost</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#BlueTeam}}
+            <tr>
+                <th><span><img src="{{AvatarUrl}}" alt="user avatar"></span>{{Username}}</th>
+                <td>{{MapsPlayed}}</td>
+                <td>{{AverageAccuracy}}</td>
+                <td>{{AverageScore}}</td>
+                <td>{{MatchCostTotal}}</td>
+            </tr>
+        {{/BlueTeam}}
+        </tbody>
+    </table>
 
-	<table class="red_team_table">
-	<caption>red team: {{Match.RedWins}}</caption>
-	<thead>
-		<tr>
-			<th>username</th>
-			<th>played</th>
-			<th>avg acc</th>
-			<th>avg score</th>
-			<th>match cost</th>
-		</tr>
-	</thead>
-	<tbody>
-	{{#RedTeam}}
-	<tr>
-		<th><span><image src="{{AvatarUrl}}" alt="user avatar"></span>{{Username}}</td>
-		<td>{{MapsPlayed}}</td>
-		<td>{{AverageAccuracy}}</td>
-		<td>{{AverageScore}}</td>
-		<td>{{MatchCostTotal}}</td>
-	</tr>
-	{{/RedTeam}}
-	</tbody>
-	</table>
+    <table class="red_team_table">
+        <caption>red team: {{Match.RedWins}}</caption>
+        <thead>
+        <tr>
+            <th>username</th>
+            <th>played</th>
+            <th>avg acc</th>
+            <th>avg score</th>
+            <th>cost</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#RedTeam}}
+            <tr>
+                <th><span><img src="{{AvatarUrl}}" alt="user avatar"></span>{{Username}}</th>
+                <td>{{MapsPlayed}}</td>
+                <td>{{AverageAccuracy}}</td>
+                <td>{{AverageScore}}</td>
+                <td>{{MatchCostTotal}}</td>
+            </tr>
+        {{/RedTeam}}
+        </tbody>
+    </table>
 </div>
 
 {{> Footer}}

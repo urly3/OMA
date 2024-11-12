@@ -1,36 +1,36 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<title> o!ma </title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-	<link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico">
-	<link rel="stylesheet" href="/css/styles.css">
+    <title> o!ma </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
 
 <div>
-	<form action="setalias" method="post">
-	<nav>
-		<a id="nav_list" class="nav_item" href="/">list</a>
-		{{^Dto}}
-		<a id="nav_add" class="nav_item" href="/addlobby">add</a>
-		{{/Dto}}
+    <form action="setalias" method="post">
+        <nav>
+            <a id="nav_list" class="nav_item" href="/">list</a>
+            {{^Dto}}
+                <a id="nav_add" class="nav_item" href="/addlobby">add</a>
+            {{/Dto}}
 
-		{{#Dto}}
-		{{^Dto.Locked}}
-		<a id="nav_add" class="nav_item" href="/addlobby">add</a>
-		<a id="nav_remove" class="nav_item" href="/removelobby">remove</a>
-		<a id="nav_lock" class="nav_item" href="/lock">lock</a>
-		{{/Dto.Locked}}
-		{{#Dto.Locked}}
-		<a id="nav_unlock" class="nav_item" href="/unlock">unlock</a>
-		{{/Dto.Locked}}
-		{{/Dto}}
-		<input class="nav_item" id ="alias" name="alias" type="text" placeholder="alias" style="display: inline"/>
-	</nav>
-	</form>
+            {{#Dto}}
+                {{^Dto.Locked}}
+                    <a id="nav_add" class="nav_item" href="/addlobby">add</a>
+                    <a id="nav_remove" class="nav_item" href="/removelobby">remove</a>
+                    <a id="nav_lock" class="nav_item" href="/lock">lock</a>
+                {{/Dto.Locked}}
+                {{#Dto.Locked}}
+                    <a id="nav_unlock" class="nav_item" href="/unlock">unlock</a>
+                {{/Dto.Locked}}
+            {{/Dto}}
+            <input class="nav_item" id="alias" name="alias" type="text" placeholder="alias" style="display: inline"/>
+        </nav>
+    </form>
 </div>
 
 <main>

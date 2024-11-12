@@ -1,6 +1,6 @@
 namespace OMA.Core;
 
-enum OMAStatus
+internal enum OmaStatus
 {
     ActionFailed,
 
@@ -29,5 +29,5 @@ enum OMAStatus
     MatchTypeInvalid,
     MatchFailedToDeserialise,
     MatchHasNoUsers,
-    MatchHasNoEvents,
+    MatchHasNoEvents
 }
