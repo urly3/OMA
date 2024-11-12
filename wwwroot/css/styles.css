@@ -88,3 +88,11 @@ input[type="submit"]:hover {
 	width: 100px;
 	padding: 8px;
 }
+
+li:nth-child(1n+2) {
+	margin-top: 12px;
+}
+
+input:focus {
+	outline: solid 2px #5c3535;
+}
