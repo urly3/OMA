@@ -96,3 +96,58 @@ li:nth-child(1n+2) {
 input:focus {
 	outline: solid 2px #5c3535;
 }
+
+table {
+	border-collapse: collapse;
+	text-align: left;
+	display: inline-block;
+	padding: 1rem;
+	vertical-align: top;
+	margin: 5px;
+}
+
+table *:not(img) {
+	padding: 6px;
+	text-align: left;
+	vertical-align: middle;
+}
+
+table span {
+	display: inline-block;
+	width: 3rem;
+	height: auto;
+}
+
+tbody th {
+	max-width: 9rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+span img {
+	box-sizing: border-box;
+	vertical-align: middle;
+	width: 100%;
+	height: auto;
+}
+
+.red_team_table {
+	border: solid 2px #666666;
+	& td {
+		border-top: solid 2px #f5424280;
+	}
+}
+
+.blue_team_table {
+	border: solid 2px #666666;
+	& td {
+		border-top: solid 2px #4287f580;
+	}
+}
+
+.table_container {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+}

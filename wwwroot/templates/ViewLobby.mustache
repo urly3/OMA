@@ -4,22 +4,22 @@
 	<h1>{{Match.Name}}: BO {{Match.BestOf}}</h1>
 </header>
 
-<div>
+<div class="table_container">
 	<table class="blue_team_table">
 	<caption>blue team: {{Match.BlueWins}}</caption>
 	<thead>
 		<tr>
 			<th>username</th>
 			<th>played</th>
-			<th>avg. acc</th>
-			<th>avg. score</th>
+			<th>avg acc</th>
+			<th>avg score</th>
 			<th>match cost</th>
 		</tr>
 	</thead>
 	<tbody>
 	{{#BlueTeam}}
 	<tr>
-		<th>{{Username}}</td>
+		<th><span><image src="{{AvatarUrl}}" alt="user avatar"></span>{{Username}}</td>
 		<td>{{MapsPlayed}}</td>
 		<td>{{AverageAccuracy}}</td>
 		<td>{{AverageScore}}</td>
@@ -29,23 +29,21 @@
 	</tbody>
 	</table>
 
-	<br>
-
 	<table class="red_team_table">
 	<caption>red team: {{Match.RedWins}}</caption>
 	<thead>
 		<tr>
 			<th>username</th>
 			<th>played</th>
-			<th>avg. acc</th>
-			<th>avg. score</th>
+			<th>avg acc</th>
+			<th>avg score</th>
 			<th>match cost</th>
 		</tr>
 	</thead>
 	<tbody>
 	{{#RedTeam}}
 	<tr>
-		<th>{{Username}}</td>
+		<th><span><image src="{{AvatarUrl}}" alt="user avatar"></span>{{Username}}</td>
 		<td>{{MapsPlayed}}</td>
 		<td>{{AverageAccuracy}}</td>
 		<td>{{AverageScore}}</td>
