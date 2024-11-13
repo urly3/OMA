@@ -14,8 +14,7 @@ public static class ImportService
 
         using var client = new HttpClient();
         using var request = new HttpRequestMessage(HttpMethod.Get, baseUri);
-        request.Headers.Add("Accept", @"application/json, text/javascript, */*; q=0.01");
-        var response = client.Send(request);
+        using var response = client.Send(request, HttpCompletionOption.ResponseHeadersRead);
 
         return response.StatusCode == HttpStatusCode.OK;
     }
@@ -39,7 +38,7 @@ public static class ImportService
 
         using var client = new HttpClient();
         using var request = new HttpRequestMessage(HttpMethod.Get, baseUri);
-        request.Headers.Add("Accept", @"application/json, text/javascript, */*; q=0.01");
+        request.Headers.Add("Accept", @"application/json");
         using var response = client.Send(request);
 
         if (response.StatusCode != HttpStatusCode.OK)
@@ -57,7 +56,7 @@ public static class ImportService
         {
             using var newRequest = new HttpRequestMessage(HttpMethod.Get,
                 baseUri + GenerateAdditionalQueryString(lobbyFirstEventId));
-            newRequest.Headers.Add("Accept", @"application/json, text/javascript, */*; q=0.01");
+            newRequest.Headers.Add("Accept", @"application/json");
 
             using var newResponse = client.Send(newRequest);
             if (newResponse.StatusCode != HttpStatusCode.OK)
