@@ -102,8 +102,7 @@ table {
     border-collapse: collapse;
     text-align: left;
     display: inline-block;
-    vertical-align: top;
-    margin: 5px;
+    margin: 1rem 0;
 }
 
 table *:not(img) {
