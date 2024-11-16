@@ -8,48 +8,41 @@ using OMA.Core.Models.Dto;
 using OMA.Core.Services;
 using Stubble.Core.Builders;
 
-namespace OMA.Mvc.controllers;
+namespace OMA.Mvc;
 
-public class HomeController : Controller
+public class HomeController(OmaContext context) : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-    private readonly OmaService _omaService;
-
-    public HomeController(ILogger<HomeController> logger, OmaContext context)
-    {
-        _logger = logger;
-        _omaService = new OmaService(context);
-    }
+    private readonly OmaService _omaService = new(context);
 
     [Route("")]
     public IActionResult Index()
     {
-        var dto = CheckAndGetAliasDtoFromCookie();
-        if (dto == null && Request.Cookies["alias_hash"] == null)
-            dto = _omaService.GetAliasAsDto(OmaUtil.HashString("kane"));
-
-        Response.Headers["content-type"] = "text/hmtl";
-        return Content(RenderStubbleTemplate("Index", new BlankViewModel(dto)), "text/html");
+        var alias = TryGetAliasFromCookie();
+        var dto = new AliasDto(alias);
+        var viewmodel = new PageViewModel(dto) { AliasCookieSet = Request.Cookies.ContainsKey("alias_hash") };
+        return Content(RenderStubbleTemplate("Index", viewmodel), "text/html");
     }
 
     [HttpGet("viewlobby")]
     public IActionResult ViewLobby()
     {
         var lobbyId = GetLobbyFromQuery();
-        if (lobbyId == null) return Problem("invalid lobby", statusCode: 400);
+        if (lobbyId == null)
+            return Problem("invalid lobby", statusCode: 400);
 
-        var dto = CheckAndGetAliasDtoFromCookie();
+        var alias = TryGetAliasFromCookie();
         var bestOf = GetBestOfFromQuery();
         var warmups = GetWarmupsFromQuery();
 
-        if (bestOf == null || warmups == null) return Problem("invalid bestof / warmups", statusCode: 400);
+        if (bestOf == null || warmups == null)
+            return Problem("invalid bestof / warmups", statusCode: 400);
 
         var match = _omaService.GetMatch(lobbyId.Value, bestOf.Value, warmups.Value);
 
-        if (match == null) return Problem("could not get match from lobby id");
+        if (!match.Some())
+            return Problem("could not get match from lobby id");
 
-        var viewmodel = new ViewLobbyViewModel(dto, match);
-
+        var viewmodel = new ViewLobbyViewModel(new AliasDto(alias), match.Value()) { AliasCookieSet = Request.Cookies.ContainsKey("alias_hash") };
         return Content(RenderStubbleTemplate("ViewLobby", viewmodel), "text/html");
     }
 
@@ -59,34 +52,53 @@ public class HomeController : Controller
     {
         var aliasHash = Request.Cookies["alias_hash"];
 
-        if (string.IsNullOrWhiteSpace(aliasHash)) return Problem("no alias set", statusCode: 400);
+        if (string.IsNullOrWhiteSpace(aliasHash))
+            return Problem("no alias set", statusCode: 400);
 
-        var dto = CheckAndGetAliasDtoFromCookie();
-        if (dto != null && dto.Locked) return Problem("alias is locked", statusCode: 400);
+        var alias = TryGetAliasFromCookie();
 
-        if (Request.Method == "GET")
-            return Content(RenderStubbleTemplate("AddLobby", new BlankViewModel(dto)), "text/html");
+        if (alias != null && alias.Password != null)
+            return Problem("alias is locked", statusCode: 400);
 
-        var lobbyId = GetLobbyFromForm();
-        if (lobbyId == null) return Problem("lobbyId not a valid number.", statusCode: 400);
-
-        var bestOf = GetBestOfFromForm();
-        var warmups = GetWarmupsFromForm();
-
-        if (bestOf == null || warmups == null) return Problem("invalid bestof / warmups", statusCode: 400);
-
-        var lobbyName = Request.Form["lobby_name"];
-
-        // TODO: flesh this out for all error statuses
-        switch (_omaService.AddLobbyToAlias(aliasHash, lobbyId.Value, bestOf.Value, warmups.Value, lobbyName,
-                    true))
+        switch (Request.Method)
         {
-            case OmaStatus.LobbyAdded:
-                return Redirect("/");
-            case OmaStatus.AliasContainsLobby:
-                return Problem("alias contains existing lobby");
+            case "GET":
+            {
+                var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias_hash") };
+                return Content(RenderStubbleTemplate("AddLobby",viewmodel), "text/html");
+            }
+            case "POST":
+            {
+                var lobbyId = GetLobbyIdFromForm();
+                if (lobbyId == null)
+                    return Problem("lobbyId not a valid number.", statusCode: 400);
+
+                var bestOf = GetBestOfFromForm();
+                var warmups = GetWarmupsFromForm();
+
+                if (bestOf == null || warmups == null)
+                    return Problem("invalid bestof / warmups", statusCode: 400);
+
+                var lobbyName = Request.Form["lobby_name"].First();
+
+                var lobby = TryGetOrCreateLobby(lobbyName, lobbyId.Value, bestOf.Value, warmups.Value);
+                if (lobby == null)
+                {
+                    return Problem("invalid lobby", statusCode: 400);
+                }
+
+                alias ??= _omaService.CreateAliasFromHash(aliasHash).Value();
+
+                // TODO: flesh this out for all error statuses
+                return _omaService.AddLobbyToAlias(alias, lobby) switch
+                {
+                    OmaStatus.LobbyAdded => Redirect("/"),
+                    OmaStatus.AliasContainsLobby => Problem("alias contains existing lobby"),
+                    _ => Problem("error while adding lobby")
+                };
+            }
             default:
-                return Problem("unhandled error status");
+                return NotFound();
         }
     }
 
@@ -94,27 +106,51 @@ public class HomeController : Controller
     [HttpPost("removelobby")]
     public IActionResult RemoveLobby()
     {
-        var dto = CheckAndGetAliasDtoFromCookie();
-        if (dto == null) return Problem("invalid alias", statusCode: 400);
+        var alias = TryGetAliasFromCookie();
+        if (alias == null)
+            return Problem("invalid alias", statusCode: 400);
 
-        if (dto.Locked) return Problem("alias is locked", statusCode: 400);
+        if (alias.Password != null)
+            return Problem("alias is locked", statusCode: 400);
 
-        if (Request.Method == "GET")
-            return Content(RenderStubbleTemplate("RemoveLobby", new BlankViewModel(dto)), "text/html");
-
-        var lobbyId = GetLobbyFromForm();
-        if (lobbyId == null) return Problem("invalid lobby", statusCode: 400);
-
-        string? lobbyName = Request.Form["lobby_name"];
-        if (lobbyName == null) return Problem("lobby name not provided", statusCode: 400);
-
-        // TODO: flesh this out for all error statuses
-        switch (_omaService.RemoveLobbyFromAlias(dto, lobbyId.Value, lobbyName))
+        switch (Request.Method)
         {
-            case OmaStatus.LobbyRemoved:
-                return Redirect(Url.Action()!);
+            case "GET":
+            {
+                var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias_hash") };
+                return Content(RenderStubbleTemplate("RemoveLobby", viewmodel), "text/html");
+            }
+            case "POST":
+            {
+                var lobbyId = GetLobbyIdFromForm();
+                if (lobbyId == null)
+                    return Problem("invalid lobby", statusCode: 400);
+
+                string? lobbyName = Request.Form["lobby_name"];
+                if (lobbyName == null)
+                    return Problem("lobby name not provided", statusCode: 400);
+
+                var bestOf = GetBestOfFromFormRequired();
+                var warmups = GetWarmupsFromFormRequired();
+
+                if (bestOf == null || warmups == null)
+                    return Problem("invalid bestof / warmups", statusCode: 400);
+
+                var lobby = TryGetLobby(lobbyName, lobbyId.Value, bestOf.Value, warmups.Value);
+                if (lobby == null)
+                {
+                    return Problem("invalid lobby", statusCode: 400);
+                }
+
+                // TODO: flesh this out for all error statuses
+                return _omaService.RemoveLobbyFromAlias(alias, lobby) switch
+                {
+                    OmaStatus.LobbyRemoved => Redirect(Url.Action()!),
+                    _ => Problem("error while removing lobby")
+                };
+            }
             default:
-                return Problem("unhandled error status");
+                return NotFound();
         }
     }
 
@@ -123,7 +159,8 @@ public class HomeController : Controller
     {
         string? alias = Request.Form["alias"];
 
-        if (string.IsNullOrWhiteSpace(alias)) return Redirect("/");
+        if (string.IsNullOrWhiteSpace(alias))
+            return Redirect("/");
 
         var aliasHash = OmaUtil.HashString(alias);
 
@@ -136,25 +173,36 @@ public class HomeController : Controller
     [HttpGet("lock")]
     public IActionResult Lock()
     {
-        var dto = CheckAndGetAliasDtoFromCookie();
-        if (dto == null) return Problem("invalid alias", statusCode: 400);
+        var alias = TryGetAliasFromCookie();
+        if (alias == null)
+            return Problem("invalid alias", statusCode: 400);
 
-        if (dto.Locked) return Problem("alias is locked", statusCode: 400);
+        if (alias.Password != null)
+            return Problem("alias is locked", statusCode: 400);
 
-        if (Request.Method == "GET")
-            return Content(RenderStubbleTemplate("Lock", new BlankViewModel(dto)), "text/html");
-
-        var password = GetPasswordFromForm();
-        if (password == null) return Problem("password not provided", statusCode: 400);
-
-        var passwordHash = OmaUtil.HashString(password);
-
-        switch (_omaService.SetAliasPassword(dto, passwordHash))
+        switch (Request.Method)
         {
-            case OmaStatus.PasswordSet:
-                return Redirect("/");
+            case "GET":
+            {
+                var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias_hash") };
+                return Content(RenderStubbleTemplate("Lock", viewmodel), "text/html");
+            }
+            case "POST":
+            {
+                var password = GetPasswordFromForm();
+                if (password == null)
+                    return Problem("password not provided", statusCode: 400);
+
+                var passwordHash = OmaUtil.HashString(password);
+
+                return _omaService.LockAlias(alias, passwordHash) switch
+                {
+                    OmaStatus.PasswordSet => Redirect("/"),
+                    _ => Problem("error while locking alias")
+                };
+            }
             default:
-                return Problem("unhandled error status");
+                return NotFound();
         }
     }
 
@@ -162,23 +210,40 @@ public class HomeController : Controller
     [HttpGet("unlock")]
     public IActionResult Unlock()
     {
-        var dto = CheckAndGetAliasDtoFromCookie();
-        if (dto == null) return Problem("invalid alias", statusCode: 400);
+        var alias = TryGetAliasFromCookie();
+        if (alias == null)
+            return Problem("invalid alias", statusCode: 400);
 
-        if (Request.Method == "GET")
-            return Content(RenderStubbleTemplate("Unlock", new BlankViewModel(dto)), "text/html");
-
-        var password = GetPasswordFromForm();
-        if (password == null) return Problem("password not provided", statusCode: 400);
-
-        var passwordHash = OmaUtil.HashString(password);
-
-        switch (_omaService.UnsetAliasPassword(dto, passwordHash))
+        if (alias.Password == null)
         {
-            case OmaStatus.PasswordSet:
-                return Redirect("/");
+            return Problem("alias is unlocked", statusCode: 400);
+        }
+
+        switch (Request.Method)
+        {
+            case "GET":
+            {
+                var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias_hash") };
+                return Content(RenderStubbleTemplate("Unlock", viewmodel), "text/html");
+            }
+            case "POST":
+            {
+                var password = GetPasswordFromForm();
+                if (password == null)
+                    return Problem("password not provided", statusCode: 400);
+
+                var passwordHash = OmaUtil.HashString(password);
+
+                switch (_omaService.UnlockAlias(alias, passwordHash))
+                {
+                    case OmaStatus.PasswordSet:
+                        return Redirect("/");
+                    default:
+                        return Problem("error while unlocking alias");
+                }
+            }
             default:
-                return Problem("unhandled error status");
+                return NotFound();
         }
     }
 
@@ -186,25 +251,70 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return Problem(
+            new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }.ToString());
     }
 
-    private AliasDto? CheckAndGetAliasDtoFromCookie()
+    // utils //
+    private Alias? TryGetAliasFromCookie()
     {
         var aliasHash = Request.Cookies["alias_hash"];
-        if (string.IsNullOrWhiteSpace(aliasHash)) return null;
+        if (string.IsNullOrWhiteSpace(aliasHash))
+            return null;
 
-        var dto = _omaService.GetAliasAsDto(aliasHash);
+        var alias = _omaService.GetAliasFromHash(aliasHash);
 
-        return dto;
+        if (!alias.Some())
+        {
+            return null;
+        }
+
+        return alias.Value();
     }
 
-    private long? GetLobbyFromForm()
+    private Lobby? TryGetLobby(string lobbyName, long lobbyId, int bestOf, int warmups)
+    {
+        var existingLobbyResult = _omaService.GetLobby(lobbyName, lobbyId, bestOf, warmups);
+        if (existingLobbyResult.Some())
+        {
+            return existingLobbyResult.Value();
+        }
+
+        return null;
+    }
+
+    private Lobby? TryGetOrCreateLobby(string? lobbyName, long lobbyId, int bestOf, int warmups)
+    {
+        if (!_omaService.IsValidLobbyId(lobbyId))
+        {
+            return null;
+        }
+
+        lobbyName ??= _omaService.GetLobbyNameFromLobbyId(lobbyId).Value();
+
+        var existingLobbyResult = _omaService.GetLobby(lobbyName, lobbyId, bestOf, warmups);
+        if (existingLobbyResult.Some())
+        {
+            return existingLobbyResult.Value();
+        }
+
+        var lobby = new Lobby
+        {
+            LobbyName = lobbyName,
+            LobbyId = lobbyId,
+            BestOf = bestOf,
+            Warmups = warmups,
+        };
+
+        return lobby;
+    }
+
+    private long? GetLobbyIdFromForm()
     {
         var lobby = Request.Form["lobby"].FirstOrDefault();
-        long lobbyId;
 
-        if (!long.TryParse(lobby, out lobbyId)) return null;
+        if (!long.TryParse(lobby, out var lobbyId))
+            return null;
 
         return lobbyId;
     }
@@ -212,9 +322,9 @@ public class HomeController : Controller
     private long? GetLobbyFromQuery()
     {
         var lobby = Request.Query["lobby"].FirstOrDefault();
-        long lobbyId;
 
-        if (!long.TryParse(lobby, out lobbyId)) return null;
+        if (!long.TryParse(lobby, out var lobbyId))
+            return null;
 
         return lobbyId;
     }
@@ -222,11 +332,11 @@ public class HomeController : Controller
     private int? GetBestOfFromQuery()
     {
         var bestOfStr = Request.Query["best_of"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(bestOfStr)) return 0;
+        if (string.IsNullOrWhiteSpace(bestOfStr))
+            return 0;
 
-        int bestOf;
-
-        if (!int.TryParse(bestOfStr, out bestOf)) return null;
+        if (!int.TryParse(bestOfStr, out var bestOf))
+            return null;
 
         return bestOf;
     }
@@ -234,11 +344,23 @@ public class HomeController : Controller
     private int? GetBestOfFromForm()
     {
         var bestOfStr = Request.Form["best_of"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(bestOfStr)) return 0;
+        if (string.IsNullOrWhiteSpace(bestOfStr))
+            return 0;
 
-        int bestOf;
+        if (!int.TryParse(bestOfStr, out var bestOf))
+            return null;
 
-        if (!int.TryParse(bestOfStr, out bestOf)) return null;
+        return bestOf;
+    }
+
+    private int? GetBestOfFromFormRequired()
+    {
+        var bestOfStr = Request.Form["best_of"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(bestOfStr))
+            return null;
+
+        if (!int.TryParse(bestOfStr, out var bestOf))
+            return null;
 
         return bestOf;
     }
@@ -246,11 +368,11 @@ public class HomeController : Controller
     private int? GetWarmupsFromQuery()
     {
         var warmupsStr = Request.Query["warmups"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(warmupsStr)) return 0;
+        if (string.IsNullOrWhiteSpace(warmupsStr))
+            return 0;
 
-        int warmups;
-
-        if (!int.TryParse(warmupsStr, out warmups)) return null;
+        if (!int.TryParse(warmupsStr, out var warmups))
+            return null;
 
         return warmups;
     }
@@ -258,11 +380,23 @@ public class HomeController : Controller
     private int? GetWarmupsFromForm()
     {
         var warmupsStr = Request.Form["warmups"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(warmupsStr)) return 0;
+        if (string.IsNullOrWhiteSpace(warmupsStr))
+            return 0;
 
-        int warmups;
+        if (!int.TryParse(warmupsStr, out var warmups))
+            return null;
 
-        if (!int.TryParse(warmupsStr, out warmups)) return null;
+        return warmups;
+    }
+
+    private int? GetWarmupsFromFormRequired()
+    {
+        var warmupsStr = Request.Form["warmups"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(warmupsStr))
+            return 0;
+
+        if (!int.TryParse(warmupsStr, out var warmups))
+            return null;
 
         return warmups;
     }
@@ -270,18 +404,22 @@ public class HomeController : Controller
     private string? GetPasswordFromForm()
     {
         var password = Request.Form["password"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(password)) return null;
+        if (string.IsNullOrWhiteSpace(password))
+            return null;
 
         return password;
     }
 
+/*
     private string? GetPasswordFromCookie()
     {
         var passwordHash = Request.Cookies["password_hash"];
-        if (string.IsNullOrWhiteSpace(passwordHash)) return null;
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            return null;
 
         return passwordHash;
     }
+*/
 
     private string RenderStubbleTemplate(string template, dynamic? model)
     {
@@ -298,11 +436,11 @@ public class HomeController : Controller
         var partials = new Dictionary<string, string>();
 
         foreach (var file in filePaths)
-            using (var streamReader =
-                   new StreamReader(string.Format($@".\wwwroot\templates\{file}.mustache"), Encoding.UTF8))
-            {
-                partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
-            }
+        {
+            using var streamReader =
+                new StreamReader(string.Format($@".\wwwroot\templates\{file}.mustache"), Encoding.UTF8);
+            partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
+        }
 
         // render passed in template
         using (var streamReader =

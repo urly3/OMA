@@ -1,10 +1,11 @@
 namespace OMA.Core;
 
-internal enum OmaStatus
+public enum OmaStatus
 {
+    Ok,
     ActionFailed,
 
-    AliasCrated,
+    AliasCreated,
     AliasDoesNotExist,
     AliasExists,
     AliasIsLocked,

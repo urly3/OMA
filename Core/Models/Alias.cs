@@ -1,12 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace OMA.Core.Models;
 
-public record Alias
+public class Alias
 {
     public int Id { get; set; }
     public List<Lobby> Lobbies { get; set; } = [];
-    public string Hash { get; set; } = default!;
-
-    public string? Password { get; set; } = null;
-    // no need for locked bool. if it has a password, it's locked.
-    // prevent unnecessary data store and race potential.
+    [MaxLength(100)] public string Hash { get; set; } = default!;
+    [MaxLength(100)] public string? Password { get; set; } = null;
 }

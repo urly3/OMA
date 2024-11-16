@@ -31,7 +31,7 @@ public static class ImportService
         return match;
     }
 
-    private static Imported.Lobby? GetLobbyFromId(long id)
+    public static Imported.Lobby? GetLobbyFromId(long id)
     {
         var multiLink = @"https://osu.ppy.sh/community/matches/";
         var baseUri = multiLink + id;
@@ -92,7 +92,7 @@ public static class ImportService
     }
 
     // converting the imported lobby type into the match type that we can perform operations on.
-    private static Internal.Match GetMatchFromLobby(Imported.Lobby lobby, int bestOf = 0, int warmups = 0)
+    public static Internal.Match GetMatchFromLobby(Imported.Lobby lobby, int bestOf = 0, int warmups = 0)
     {
         // we know the lobby has events.
         // we know the lobby has users.
@@ -305,6 +305,7 @@ public static class ImportService
             {
                 continue;
             }
+
             user.AverageScore = user.AverageScore / user.MapsPlayed;
             user.AverageAccuracy = user.AverageAccuracy / user.MapsPlayed * 100;
             user.HighestAccuracy *= 100;
