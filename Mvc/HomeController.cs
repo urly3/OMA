@@ -20,13 +20,13 @@ public class HomeController(OmaContext context) : Controller
         var alias = TryGetAliasFromCookie();
         var dto = new AliasDto(alias);
         var viewmodel = new PageViewModel(dto) { AliasCookieSet = Request.Cookies.ContainsKey("alias") };
-        return Content(RenderStubbleTemplate("Index", viewmodel), "text/html");
+        return RenderStubbleTemplate("Index", viewmodel);
     }
 
     [HttpGet("viewlobby")]
     public IActionResult ViewLobby()
     {
-        var lobbyId = GetLobbyFromQuery();
+        var lobbyId = GetLobbyIdFromQuery();
         if (lobbyId == null)
             return Problem("invalid lobby", statusCode: 400);
 
@@ -43,7 +43,7 @@ public class HomeController(OmaContext context) : Controller
             return Problem("could not get match from lobby id");
 
         var viewmodel = new ViewLobbyViewModel(new AliasDto(alias), match.Value()) { AliasCookieSet = Request.Cookies.ContainsKey("alias") };
-        return Content(RenderStubbleTemplate("ViewLobby", viewmodel), "text/html");
+        return RenderStubbleTemplate("ViewLobby", viewmodel);
     }
 
     [HttpGet("addlobby")]
@@ -65,7 +65,7 @@ public class HomeController(OmaContext context) : Controller
             case "GET":
                 {
                     var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias") };
-                    return Content(RenderStubbleTemplate("AddLobby", viewmodel), "text/html");
+                    return RenderStubbleTemplate("AddLobby", viewmodel);
                 }
             case "POST":
                 {
@@ -118,7 +118,7 @@ public class HomeController(OmaContext context) : Controller
             case "GET":
                 {
                     var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias") };
-                    return Content(RenderStubbleTemplate("RemoveLobby", viewmodel), "text/html");
+                    return RenderStubbleTemplate("RemoveLobby", viewmodel);
                 }
             case "POST":
                 {
@@ -185,7 +185,7 @@ public class HomeController(OmaContext context) : Controller
             case "GET":
                 {
                     var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias") };
-                    return Content(RenderStubbleTemplate("Lock", viewmodel), "text/html");
+                    return RenderStubbleTemplate("Lock", viewmodel);
                 }
             case "POST":
                 {
@@ -224,7 +224,7 @@ public class HomeController(OmaContext context) : Controller
             case "GET":
                 {
                     var viewmodel = new PageViewModel(new AliasDto(alias)) { AliasCookieSet = Request.Cookies.ContainsKey("alias") };
-                    return Content(RenderStubbleTemplate("Unlock", viewmodel), "text/html");
+                    return RenderStubbleTemplate("Unlock", viewmodel);
                 }
             case "POST":
                 {
@@ -319,7 +319,7 @@ public class HomeController(OmaContext context) : Controller
         return lobbyId;
     }
 
-    private long? GetLobbyFromQuery()
+    private long? GetLobbyIdFromQuery()
     {
         var lobby = Request.Query["lobby"].FirstOrDefault();
 
@@ -393,7 +393,7 @@ public class HomeController(OmaContext context) : Controller
     {
         var warmupsStr = Request.Form["warmups"].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(warmupsStr))
-            return 0;
+            return null;
 
         if (!int.TryParse(warmupsStr, out var warmups))
             return null;
@@ -410,21 +410,9 @@ public class HomeController(OmaContext context) : Controller
         return password;
     }
 
-    /*
-        private string? GetPasswordFromCookie()
-        {
-            var passwordHash = Request.Cookies["password_hash"];
-            if (string.IsNullOrWhiteSpace(passwordHash))
-                return null;
-
-            return passwordHash;
-        }
-    */
-
-    private string RenderStubbleTemplate(string template, dynamic? model)
+    private IActionResult RenderStubbleTemplate(string template, dynamic? model)
     {
         var stubble = new StubbleBuilder().Build();
-
         // since templates are loaded at runtime on each request, it's hot swappable / reloadable
         // 
         // add global partials
@@ -437,17 +425,19 @@ public class HomeController(OmaContext context) : Controller
 
         foreach (var file in filePaths)
         {
-            using var streamReader =
-                new StreamReader(string.Format($@".\wwwroot\templates\{file}.mustache", file), Encoding.UTF8);
-            partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
+            using (var streamReader =
+                new StreamReader($@".\wwwroot\templates\{file}.mustache", Encoding.UTF8))
+            {
+                partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
+                streamReader.Dispose();
+            }
         }
 
         // render passed in template
-        using (var streamReader =
-               new StreamReader(string.Format($@".\wwwroot\templates\{template}.mustache", template), Encoding.UTF8))
+        using (var streamReader = new StreamReader($@".\wwwroot\templates\{template}.mustache", Encoding.UTF8))
         {
             var output = stubble.Render(streamReader.ReadToEnd(), model, partials, null);
-            return output;
+            return Content(output, "text/html");
         }
     }
 }
