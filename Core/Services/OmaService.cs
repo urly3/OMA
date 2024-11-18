@@ -10,12 +10,17 @@ internal class OmaService
 {
     private const int CacheExpirationInMinutes = 60;
     private static readonly ConcurrentDictionary<long, CachedLobby> ImportedLobbiesCache = [];
+    private static bool _firstRun = true;
     private readonly OmaContext _context;
 
     public OmaService(OmaContext context)
     {
         _context = context;
-        _ = Task.Run(CleanupCache).ConfigureAwait(false);
+        if (_firstRun)
+        {
+            _ = Task.Run(CleanupCache).ConfigureAwait(false);
+            _firstRun = false;
+        }
     }
 
     private static async void CleanupCache()
