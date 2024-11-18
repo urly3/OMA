@@ -162,8 +162,6 @@ public class HomeController(OmaContext context) : Controller
         if (string.IsNullOrWhiteSpace(alias))
             return Redirect("/");
 
-        var aliasHash = OmaUtil.HashString(alias);
-
         Response.Cookies.Append("alias", alias);
 
         return Redirect("/");
@@ -264,12 +262,7 @@ public class HomeController(OmaContext context) : Controller
 
         var alias = _omaService.GetAlias(aliasStr);
 
-        if (!alias.Some())
-        {
-            return null;
-        }
-
-        return alias.Value();
+        return !alias.Some() ? null : alias.Value();
     }
 
     private Lobby? TryGetLobby(string lobbyName, long lobbyId, int bestOf, int warmups)
@@ -429,7 +422,6 @@ public class HomeController(OmaContext context) : Controller
                 new StreamReader($@".\wwwroot\templates\{file}.mustache", Encoding.UTF8))
             {
                 partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
-                streamReader.Dispose();
             }
         }
 
