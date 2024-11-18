@@ -40,16 +40,19 @@ internal class OmaService
     }
 
     // data stuff //
-    public OmaStatusResult<Alias> GetAliasFromHash(string aliasHash)
+    public OmaStatusResult<Alias> GetAlias(string aliasName)
     {
+        var aliasHash = OmaUtil.HashString(aliasName);
         var alias = _context.GetAlias(aliasHash);
         var status = alias == null ? OmaStatus.AliasDoesNotExist : OmaStatus.AliasExists;
 
         return new OmaStatusResult<Alias>(alias, status);
     }
 
-    public OmaStatusResult<Alias> CreateAliasFromHash(string aliasHash)
+    public OmaStatusResult<Alias> CreateAlias(string aliasName)
     {
+        var aliasHash = OmaUtil.HashString(aliasName);
+
         var alias = _context.CreateAlias(aliasHash);
         var status = alias == null ? OmaStatus.AliasCouldNotBeCreated : OmaStatus.AliasCreated;
 

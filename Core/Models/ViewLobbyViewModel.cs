@@ -9,7 +9,7 @@ public class ViewLobbyViewModel
     {
         Dto = dto;
         Match = mtc;
-        
+
         foreach (var user in Match.Users)
         {
             user.AverageAccuracy = (float)Math.Round(user.AverageAccuracy, 2);
