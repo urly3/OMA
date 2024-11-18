@@ -168,3 +168,7 @@ header {
 footer {
     padding: 5px;
 }
+
+.username {
+    padding: 0;
+}
