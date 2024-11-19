@@ -233,13 +233,11 @@ public class HomeController(OmaContext context, IMemoryCache memoryCache) : Cont
 
                     var passwordHash = OmaUtil.HashString(password);
 
-                    switch (_omaService.UnlockAlias(alias, passwordHash))
+                    return _omaService.UnlockAlias(alias, passwordHash) switch
                     {
-                        case OmaStatus.PasswordSet:
-                            return Redirect("/");
-                        default:
-                            return Problem("error while unlocking alias");
-                    }
+                        OmaStatus.PasswordSet => Redirect("/"),
+                        _ => Problem("error while unlocking alias")
+                    };
                 }
             default:
                 return NotFound();
@@ -269,12 +267,7 @@ public class HomeController(OmaContext context, IMemoryCache memoryCache) : Cont
     private Lobby? TryGetLobby(string lobbyName, long lobbyId, int bestOf, int warmups)
     {
         var existingLobbyResult = _omaService.GetLobby(lobbyName, lobbyId, bestOf, warmups);
-        if (existingLobbyResult.Some())
-        {
-            return existingLobbyResult.Value();
-        }
-
-        return null;
+        return existingLobbyResult.Some() ? existingLobbyResult.Value() : null;
     }
 
     private Lobby? TryGetOrCreateLobby(string? lobbyName, long lobbyId, int bestOf, int warmups)
@@ -398,10 +391,7 @@ public class HomeController(OmaContext context, IMemoryCache memoryCache) : Cont
     private string? GetPasswordFromForm()
     {
         var password = Request.Form["password"].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(password))
-            return null;
-
-        return password;
+        return string.IsNullOrWhiteSpace(password) ? null : password;
     }
 
     private IActionResult RenderStubbleTemplate(string template, dynamic? model)

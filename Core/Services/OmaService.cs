@@ -10,6 +10,11 @@ internal class OmaService(OmaContext context, IMemoryCache memoryCache)
 {
     private const int CacheExpirationInMinutes = 60;
 
+    private static MemoryCacheEntryOptions CacheEntryOptions => new()
+    {
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(CacheExpirationInMinutes),
+    };
+
     // data stuff //
     public OmaStatusResult<Alias> GetAlias(string aliasName)
     {
@@ -98,16 +103,16 @@ internal class OmaService(OmaContext context, IMemoryCache memoryCache)
     {
         if (memoryCache.TryGetValue(lobbyId, out Imported.Lobby? cached))
         {
-            memoryCache.Set(lobbyId, cached, TimeSpan.FromMinutes(CacheExpirationInMinutes));
+            memoryCache.Set(lobbyId, cached, CacheEntryOptions);
             return cached;
         }
 
         var lobby = ImportService.GetLobbyFromId(lobbyId);
 
         if (lobby != null)
-            memoryCache.Set(lobbyId, lobby, TimeSpan.FromMinutes(CacheExpirationInMinutes));
+            memoryCache.Set(lobbyId, lobby, CacheEntryOptions);
 
-        return lobby ?? null;
+        return lobby;
     }
 
     public OmaStatusResult<string> GetLobbyNameFromLobbyId(long lobbyId)
