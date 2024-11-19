@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using OMA.Core;
 using OMA.Core.Data;
 using OMA.Core.Models;
@@ -10,9 +11,9 @@ using Stubble.Core.Builders;
 
 namespace OMA.Mvc;
 
-public class HomeController(OmaContext context) : Controller
+public class HomeController(OmaContext context, IMemoryCache memoryCache) : Controller
 {
-    private readonly OmaService _omaService = new(context);
+    private readonly OmaService _omaService = new(context, memoryCache);
 
     [Route("")]
     public IActionResult Index()

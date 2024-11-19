@@ -5,22 +5,20 @@ namespace OMA.Core.Data;
 
 public class OmaContext : DbContext
 {
-    private readonly string _connectionString = "Data Source=oma.db";
+    private const string ConnectionString = "Data Source=oma.db";
 
     private DbSet<Lobby> Lobbies { get; set; } = default!;
     private DbSet<Alias> Aliases { get; set; } = default!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite(_connectionString);
+        optionsBuilder.UseSqlite(ConnectionString);
     }
 
     internal Alias? GetAlias(string aliasHash)
     {
         var alias = Aliases.Include(a => a.Lobbies).FirstOrDefault(a => a.Hash == aliasHash);
-        if (alias == null) return null;
-
-        return alias;
+        return alias ?? null;
     }
 
     internal Alias? GetAliasById(int id)
