@@ -410,14 +410,14 @@ public class HomeController(OmaContext context, IMemoryCache memoryCache) : Cont
         foreach (var file in filePaths)
         {
             using (var streamReader =
-                new StreamReader($@".\wwwroot\templates\{file}.mustache", Encoding.UTF8))
+                new StreamReader($@"./wwwroot/templates/{file}.mustache", Encoding.UTF8))
             {
                 partials.Add(file, stubble.Render(streamReader.ReadToEnd(), model));
             }
         }
 
         // render passed in template
-        using (var streamReader = new StreamReader($@".\wwwroot\templates\{template}.mustache", Encoding.UTF8))
+        using (var streamReader = new StreamReader($@"./wwwroot/templates/{template}.mustache", Encoding.UTF8))
         {
             var output = stubble.Render(streamReader.ReadToEnd(), model, partials, null);
             return Content(output, "text/html");
